@@ -3,14 +3,24 @@
 :root {
   --background: #0A0A0A;
   --foreground: #FFFFFF;
+  --theme-primary: #1F3864;
+  --theme-accent: #1D9E75;
+  --theme-highlight: #4488CC;
+  --theme-dark-card: #111b2d;
+}
+
+body.theme-independence {
+  --theme-primary: #FF9933;
+  --theme-accent: #138808;
+  --theme-highlight: #FFD700;
 }
 
 @theme {
-  --color-primary: #1F3864;
-  --color-accent: #1D9E75;
-  --color-highlight: #4488CC;
+  --color-primary: var(--theme-primary);
+  --color-accent: var(--theme-accent);
+  --color-highlight: var(--theme-highlight);
   --color-dark-bg: #0A0A0A;
-  --color-dark-card: #111b2d;
+  --color-dark-card: var(--theme-dark-card);
   --font-heading: 'Arial Black', Arial, sans-serif;
   --font-body: Arial, sans-serif;
 }
@@ -81,4 +91,44 @@ body {
 .dot-bg {
   background-image: radial-gradient(rgba(68, 136, 204, 0.1) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+.theme-independence .dot-bg {
+  background-image: radial-gradient(rgba(255, 153, 51, 0.1) 1px, transparent 1px);
+}
+
+/* INDEPENDENCE DAY ANIMATIONS */
+@keyframes wave-flag {
+  0% { transform: skewY(-5deg) scaleY(1); }
+  50% { transform: skewY(5deg) scaleY(1.05); }
+  100% { transform: skewY(-5deg) scaleY(1); }
+}
+
+.animate-wave-flag {
+  animation: wave-flag 2s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(100vh) rotate(0deg) scale(0.8); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
+}
+
+.animate-float-up {
+  animation: float-up 15s linear infinite;
+}
+
+.text-glow-saffron {
+  text-shadow: 0 0 15px rgba(255, 153, 51, 0.4);
 }

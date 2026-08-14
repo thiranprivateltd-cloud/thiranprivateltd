@@ -5,17 +5,23 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import { ArrowRight, BookOpen, Layers, CheckCircle2, Shield, Activity, Users, Globe2, Code2, Zap } from 'lucide-react';
+import { useIndependenceDay } from '@/components/independence-day/IndependenceDayProvider';
+import IndependenceDayBanner from '@/components/independence-day/IndependenceDayBanner';
+import IndependenceDaySection from '@/components/independence-day/IndependenceDaySection';
 
 export default function Home() {
   const { t } = useTranslation();
+  const isIndependenceDay = useIndependenceDay();
 
   return (
     <div className="min-h-screen py-10 relative overflow-hidden bg-[#0A0A0A]">
       {/* Refined subtle gradients instead of heavy neon */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 rounded-[100%] blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[var(--theme-primary)]/10 rounded-[100%] blur-[120px] pointer-events-none -z-10" />
+
+      {isIndependenceDay && <IndependenceDayBanner />}
 
       {/* 1. HERO SECTION - EXECUTION FOCUSED */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 md:pt-28 md:pb-24 flex flex-col items-center text-center">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 md:pt-16 md:pb-24 flex flex-col items-center text-center">
         {/* Status Pill */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -75,25 +81,51 @@ export default function Home() {
       <section className="border-y border-white/5 bg-[#0D0D0D] py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/5">
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-white mb-1">500+</span>
-              <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.waitlistLabel')}</span>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-white mb-1">9.9/10</span>
-              <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.launchlabRatingLabel')}</span>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-white mb-1">{t('home.supportedLanguagesCount')}</span>
-              <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.supportedLanguagesLabel')}</span>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-white mb-1">100%</span>
-              <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.bootstrappedLabel')}</span>
-            </div>
+            {isIndependenceDay ? (
+              <>
+                <div className="flex flex-col items-center justify-center text-center px-2">
+                  <span className="text-3xl font-bold text-white mb-1">79 Years</span>
+                  <span className="text-xs text-[#FF9933] font-medium uppercase tracking-wider">of Freedom 🇮🇳</span>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center px-2">
+                  <span className="text-3xl font-bold text-white mb-1">1.4 Billion</span>
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">Indians We Build For</span>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center px-2">
+                  <span className="text-3xl font-bold text-white mb-1">3</span>
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">Indian Languages Supported</span>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center px-2">
+                  <span className="text-3xl font-bold text-white mb-1">1 Dream</span>
+                  <span className="text-xs text-[#138808] font-medium uppercase tracking-wider">Education for All</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-white mb-1">500+</span>
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.waitlistLabel')}</span>
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-white mb-1">9.9/10</span>
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.launchlabRatingLabel')}</span>
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-white mb-1">{t('home.supportedLanguagesCount')}</span>
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.supportedLanguagesLabel')}</span>
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-white mb-1">100%</span>
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t('home.bootstrappedLabel')}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
+
+      {/* Independence Day Section */}
+      {isIndependenceDay && <IndependenceDaySection />}
 
       {/* 3. PRODUCT SHOWCASE - BENTO BOX STYLE */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
