@@ -1,0 +1,13 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/about/page": "/about",
+  "/careers/page": "/careers",
+  "/contact/page": "/contact",
+  "/favicon.ico/route": "/favicon.ico",
+  "/investors/page": "/investors",
+  "/page": "/",
+  "/portal/page": "/portal",
+  "/products/page": "/products",
+  "/team/page": "/team"
+}
