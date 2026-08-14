@@ -5,11 +5,14 @@ import { useTranslation } from '@/context/LanguageContext';
 import { MessageSquare, ArrowUpRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
+import { useIndependenceDay } from '@/components/independence-day/IndependenceDayProvider';
+import TricolorBar from '@/components/independence-day/TricolorBar';
 
 export default function Footer() {
   const { t } = useTranslation();
   const [portalOpen, setPortalOpen] = useState(false);
   const portalRef = useRef(null);
+  const isIndependenceDay = useIndependenceDay();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -72,7 +75,11 @@ export default function Footer() {
                 href="https://youtube.com/@codewithgsv?si=rOLkfx6fwxc45bS4"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/[0.03] hover:bg-red-600/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all hover:scale-105"
+                className={`w-8 h-8 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center transition-all hover:scale-105 ${
+                  isIndependenceDay 
+                    ? "hover:bg-[#FF9933]/10 text-gray-400 hover:text-[#FF9933]" 
+                    : "hover:bg-red-600/10 text-gray-400 hover:text-red-500"
+                }`}
                 title="Code with GSV YouTube"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -83,7 +90,11 @@ export default function Footer() {
                 href="https://www.instagram.com/thiran_groups?igsh=Y28wd252azMzZDc1"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/[0.03] hover:bg-pink-600/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-pink-500 transition-all hover:scale-105"
+                className={`w-8 h-8 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center transition-all hover:scale-105 ${
+                  isIndependenceDay
+                    ? "hover:bg-[#138808]/10 text-gray-400 hover:text-[#138808]"
+                    : "hover:bg-pink-600/10 text-gray-400 hover:text-pink-500"
+                }`}
                 title="Instagram"
               >
                 <svg className="w-4 h-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -96,7 +107,11 @@ export default function Footer() {
                 href="https://wa.me/918056547565"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/[0.03] hover:bg-green-600/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-green-500 transition-all hover:scale-105"
+                className={`w-8 h-8 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center transition-all hover:scale-105 ${
+                  isIndependenceDay
+                    ? "hover:bg-[#138808]/10 text-gray-400 hover:text-[#138808]"
+                    : "hover:bg-green-600/10 text-gray-400 hover:text-green-500"
+                }`}
                 title="WhatsApp Direct"
               >
                 <MessageSquare className="w-4 h-4" />
@@ -184,10 +199,23 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-gray-500 font-body text-[10px] uppercase tracking-wider text-center md:text-left">
-            {t('footer.rights')}
-          </p>
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 pb-4">
+          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+            <p className="text-gray-500 font-body text-[10px] uppercase tracking-wider text-center md:text-left">
+              {t('footer.rights')}
+            </p>
+            {isIndependenceDay && (
+              <>
+                <span className="hidden md:inline-block text-gray-700">|</span>
+                <span className="text-[10px] uppercase tracking-wider font-bold text-[#FF9933]">
+                  Jai Hind — Happy Independence Day 🇮🇳
+                </span>
+                <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] uppercase tracking-widest font-bold text-gray-300">
+                  Proudly Made in India
+                </span>
+              </>
+            )}
+          </div>
 
           {/* Brand Mantra */}
           <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-white/5 bg-white/[0.01] text-[10px] tracking-widest text-gray-400 font-semibold uppercase">
@@ -196,7 +224,7 @@ export default function Footer() {
             <span>Build</span>
             <span className="text-gray-600">•</span>
             <span>Launch</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse ml-0.5" />
+            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ml-0.5 ${isIndependenceDay ? 'bg-[#FF9933]' : 'bg-red-600'}`} />
           </div>
 
           <div className="flex space-x-4">
@@ -210,6 +238,8 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      
+      {isIndependenceDay && <TricolorBar className="absolute bottom-0" />}
     </footer>
   );
 }

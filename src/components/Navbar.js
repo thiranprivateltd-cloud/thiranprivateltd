@@ -7,11 +7,14 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import { Menu, X, Globe } from 'lucide-react';
+import { useIndependenceDay } from '@/components/independence-day/IndependenceDayProvider';
+import TricolorBar from '@/components/independence-day/TricolorBar';
 
 export default function Navbar() {
   const { language, setLanguage, t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isIndependenceDay = useIndependenceDay();
 
   const navLinks = [
     { name: t('nav.home'), href: '/' },
@@ -45,6 +48,9 @@ export default function Navbar() {
               height={40} 
               className="object-contain h-8 md:h-10 w-auto transition-transform group-hover:scale-105"
             />
+            {isIndependenceDay && (
+              <span className="text-2xl animate-wave-flag ml-2">🇮🇳</span>
+            )}
           </Link>
 
           {/* Desktop Nav Links */}
@@ -90,12 +96,19 @@ export default function Navbar() {
             </div>
 
             {/* CTA Button */}
-            <Link
-              href="/careers"
-              className="px-5 py-2.5 rounded-full bg-[#1D9E75] hover:bg-[#15805d] text-white font-heading font-bold text-xs uppercase tracking-wider shadow-lg shadow-accent/20 transition-all hover:scale-105"
-            >
-              {t('nav.join')}
-            </Link>
+            <div className="flex items-center space-x-3">
+              {isIndependenceDay && (
+                <span className="hidden xl:inline-flex items-center text-[10px] font-bold text-[#FF9933] bg-[#FF9933]/10 px-2 py-1 rounded-full uppercase tracking-widest border border-[#FF9933]/20">
+                  Happy Independence Day 🇮🇳
+                </span>
+              )}
+              <Link
+                href="/careers"
+                className="px-5 py-2.5 rounded-full bg-[var(--theme-accent)] hover:opacity-90 text-white font-heading font-bold text-xs uppercase tracking-wider shadow-lg shadow-accent/20 transition-all hover:scale-105"
+              >
+                {t('nav.join')}
+              </Link>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -187,6 +200,7 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      {isIndependenceDay && <TricolorBar className="absolute bottom-0" />}
     </nav>
   );
 }
