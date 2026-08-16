@@ -32,6 +32,7 @@ export default function Careers() {
     { title: "Data & Analytics Engineer", dept: "Engineering", desc: "Build data pipelines and dashboards to extract actionable insights from student performance and engagement metrics." },
     { title: "Community & Campus Lead", dept: "Community", desc: "Foster and grow a vibrant community of students and educators across college campuses." },
     { title: "Research & Career Mapping Specialist", dept: "Research", desc: "Conduct in-depth research to map emerging career paths and build comprehensive guides for student counseling." }
+    { title: "Events and Webinar Coordinator", dept: "Events", desc: "Plan, Organize and Execute engaging Evenys."}
   ];
 
   const handleSubmit = async (e) => {
