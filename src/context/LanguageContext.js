@@ -749,7 +749,20 @@ export function LanguageProvider({ children }) {
     const savedLang = localStorage.getItem('thiran_lang');
     if (savedLang) {
       setLanguageState(savedLang);
+    } else {
+      // Auto-detect language
+      if (typeof window !== 'undefined' && navigator) {
+        const userLang = navigator.language.toLowerCase();
+        if (userLang.startsWith('ta')) {
+          setLanguageState('ta');
+        } else if (userLang.startsWith('hi')) {
+          setLanguageState('hi');
+        } else {
+          setLanguageState('en');
+        }
+      }
     }
+    
     const introSeen = sessionStorage.getItem('thiran_intro_seen');
     if (introSeen === 'true') {
       setShowIntro(false);
