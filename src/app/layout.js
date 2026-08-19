@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import { IndependenceDayProvider } from "@/components/independence-day/IndependenceDayProvider";
 import IndependenceDayOverlay from "@/components/independence-day/IndependenceDayOverlay";
 import FloatingFlags from "@/components/independence-day/FloatingFlags";
+import CustomCursor from "@/components/CustomCursor";
+import Chatbot from "@/components/Chatbot";
 
 export const metadata = {
   title: "Thiran Private Ltd | Smarter Steps Forward",
@@ -33,6 +35,7 @@ export default function RootLayout({ children }) {
       <body className="antialiased min-h-screen bg-[#0A0A0A] text-white flex flex-col relative overflow-x-hidden font-body">
         <IndependenceDayProvider>
           <LanguageProvider>
+            <CustomCursor />
             <IndependenceDayOverlay />
             <ParticleBackground />
             <IntroScreen />
@@ -43,6 +46,7 @@ export default function RootLayout({ children }) {
             <Footer />
             <FloatingSocials />
             <FloatingFlags />
+            <Chatbot />
           </LanguageProvider>
         </IndependenceDayProvider>
       </body>

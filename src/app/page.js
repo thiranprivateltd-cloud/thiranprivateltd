@@ -1,206 +1,205 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
-import { ShieldCheck, Lightbulb, Target, ArrowRight } from 'lucide-react';
-import { useRef, useEffect } from 'react';
+import { ArrowRight, BookOpen, Layers, CheckCircle2, Shield, Activity, Users, Globe2, Code2, Zap } from 'lucide-react';
+import { useIndependenceDay } from '@/components/independence-day/IndependenceDayProvider';
+import IndependenceDayBanner from '@/components/independence-day/IndependenceDayBanner';
+import IndependenceDaySection from '@/components/independence-day/IndependenceDaySection';
+import InvestorDashboard from '@/components/InvestorDashboard';
+import HeroParticles from '@/components/HeroParticles';
+import CompanyTimeline from '@/components/CompanyTimeline';
+import TrustedBy from '@/components/TrustedBy';
+import ProductRoadmap from '@/components/ProductRoadmap';
+import WaitlistCounter from '@/components/WaitlistCounter';
 
-export default function About() {
+export default function Home() {
   const { t } = useTranslation();
-  const timelineRef = useRef(null);
-
-  // Parse timeline array from t() helper
-  const timelineData = t('about.timeline') || [];
-  const coreValues = [
-    {
-      icon: <ShieldCheck className="w-8 h-8 text-accent" />,
-      title: t('about.values.integrity'),
-      desc: t('about.values.integrityDesc')
-    },
-    {
-      icon: <Lightbulb className="w-8 h-8 text-[#4488CC]" />,
-      title: t('about.values.innovation'),
-      desc: t('about.values.innovationDesc')
-    },
-    {
-      icon: <Target className="w-8 h-8 text-accent" />,
-      title: t('about.values.impact'),
-      desc: t('about.values.impactDesc')
-    }
-  ];
+  const isIndependenceDay = useIndependenceDay();
 
   return (
-    <div className="min-h-screen py-24 relative overflow-hidden bg-[#0A0A0A] text-white">
-      {/* Background Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#1F3864]/10 rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#1D9E75]/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+    <div className="min-h-screen py-10 relative overflow-hidden bg-[#0A0A0A]">
+      {/* Refined subtle gradients instead of heavy neon */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[var(--theme-primary)]/10 rounded-[100%] blur-[120px] pointer-events-none -z-10" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Page Header */}
-        <div className="text-center mb-20">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-accent/25 bg-accent/5 text-[10px] font-heading font-bold uppercase tracking-widest text-accent mb-4"
-          >
-            <span>{t('nav.about')}</span>
-          </motion.div>
-          
-          <motion.h1
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-heading text-4xl md:text-6xl font-black uppercase text-glow-blue leading-tight"
-          >
-            {t('about.title')}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 0.7, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="font-body text-gray-400 text-sm md:text-base max-w-xl mx-auto mt-4"
-          >
-            {t('about.subtitle')}
-          </motion.p>
-        </div>
+      {isIndependenceDay && <IndependenceDayBanner />}
 
-        {/* Story & Why Education Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-28">
-          {/* Story Card */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="glass-card rounded-3xl p-8 md:p-10 border border-white/5 bg-white/[0.01]"
-          >
-            <h2 className="font-heading text-2xl font-black text-white uppercase mb-6 flex items-center space-x-3">
-              <span className="w-1.5 h-6 bg-accent rounded-full" />
-              <span>{t('about.storyTitle')}</span>
-            </h2>
-            <p className="font-body text-gray-400 text-sm md:text-base leading-relaxed">
-              {t('about.storyText')}
-            </p>
-          </motion.div>
-
-          {/* Why Education Card */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="glass-card rounded-3xl p-8 md:p-10 border border-primary/20 bg-white/[0.01]"
-          >
-            <h2 className="font-heading text-2xl font-black text-[#4488CC] uppercase mb-6 flex items-center space-x-3">
-              <span className="w-1.5 h-6 bg-[#4488CC] rounded-full" />
-              <span>{t('about.whyTitle')}</span>
-            </h2>
-            <p className="font-body text-gray-400 text-sm md:text-base leading-relaxed">
-              {t('about.whyText')}
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Mission Statement Callout */}
+      {/* 1. HERO SECTION - TYPOGRAPHY FIRST */}
+      <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-20 pb-12 overflow-hidden">
+        <HeroParticles />
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative rounded-3xl overflow-hidden border border-white/5 bg-gradient-to-r from-white/[0.01] to-[#1F3864]/10 p-10 md:p-12 mb-28 text-center"
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center z-10"
         >
-          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-accent/5 rounded-full blur-[80px]" />
-          <h2 className="font-heading text-3xl font-black uppercase text-glow-teal mb-6">
-            {t('about.missionTitle')}
-          </h2>
-          <p className="font-heading text-lg md:text-2xl font-bold max-w-4xl mx-auto leading-relaxed text-gray-200">
-            "{t('about.missionText')}"
-          </p>
-        </motion.div>
-
-        {/* Core Values Section */}
-        <div className="mb-28">
-          <h2 className="font-heading text-3xl font-black text-center uppercase tracking-tight mb-16">
-            {t('about.valuesTitle')}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {coreValues.map((value, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="glass-card rounded-2xl p-8 border border-white/5 bg-[#0C0C0C]"
-              >
-                <div className="mb-6 flex justify-center md:justify-start">{value.icon}</div>
-                <h3 className="font-heading text-lg font-black text-white uppercase mb-4 text-center md:text-left">
-                  {value.title}
-                </h3>
-                <p className="font-body text-gray-400 text-xs md:text-sm leading-relaxed text-center md:text-left">
-                  {value.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Timeline (Animated Horizontal Scroll/Swipe) */}
-        <div className="mb-10">
-          <h2 className="font-heading text-3xl font-black text-center uppercase tracking-tight mb-16">
-            {t('about.timelineTitle')}
-          </h2>
-          
-          {/* Horizontal scroll timeline block */}
-          <div 
-            ref={timelineRef}
-            className="flex overflow-x-auto pb-10 gap-8 scrollbar-thin scrollbar-thumb-accent scrollbar-track-transparent snap-x snap-mandatory"
-            style={{ scrollBehavior: 'smooth' }}
+          {/* Typography-First Headline */}
+          <h1 
+            className="text-[12vw] sm:text-[10vw] md:text-[8vw] lg:text-[7vw] leading-[0.85] font-heading font-black text-white uppercase tracking-tighter mix-blend-difference mb-8 hover:tracking-normal transition-[letter-spacing] duration-700 ease-in-out cursor-default"
           >
-            {timelineData.map((milestone, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="flex-shrink-0 w-[290px] md:w-[320px] glass-card rounded-2xl p-6 border border-white/5 bg-[#0C0C0C] snap-start relative flex flex-col justify-between"
-              >
-                {/* Visual node line */}
-                <div className="absolute top-8 right-0 left-6 h-[1px] bg-white/5 -z-10 hidden md:block">
-                  <div className="w-3 h-3 rounded-full bg-accent -translate-y-1 animate-pulse" />
-                </div>
+            Building India's <br/> Education Future
+          </h1>
+          
+          <div className="h-px w-full max-w-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent my-8" />
+          
+          {/* Minimal Supporting Copy & Tagline */}
+          <p className="text-gray-400 font-body text-sm md:text-base uppercase tracking-[0.3em] font-bold mb-10">
+            Dream <span className="mx-2 text-gray-600">•</span> Build <span className="mx-2 text-gray-600">•</span> Launch
+          </p>
 
-                <div>
-                  <span className="font-heading text-xs font-bold text-accent uppercase tracking-widest block mb-4">
-                    {milestone.date}
-                  </span>
-                  <h3 className="font-heading text-lg font-black text-white uppercase mb-3">
-                    {milestone.title}
-                  </h3>
-                  <p className="font-body text-gray-400 text-xs leading-relaxed">
-                    {milestone.desc}
-                  </p>
-                </div>
-                
-                {idx < timelineData.length - 1 && (
-                  <div className="flex items-center text-gray-600 justify-end mt-6 md:hidden">
-                    <span className="text-[9px] font-heading font-bold uppercase tracking-wider mr-1">Next</span>
-                    <ArrowRight className="w-3 h-3 text-accent" />
-                  </div>
-                )}
-              </motion.div>
-            ))}
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 items-center">
+            <Link
+              href="/products#nextstep"
+              className="px-8 py-4 rounded-full bg-white text-black hover:bg-gray-200 font-bold text-xs uppercase tracking-widest transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] hover:scale-105"
+            >
+              Explore Products
+            </Link>
+            <Link
+              href="/about"
+              className="px-8 py-4 rounded-full bg-transparent border border-white/20 hover:bg-white/5 text-white font-bold text-xs uppercase tracking-widest transition-all hover:border-white/50"
+            >
+              Our Story
+            </Link>
           </div>
-          <div className="text-center text-gray-500 text-xs mt-2 flex items-center justify-center space-x-2">
-            <span className="animate-pulse">↔</span>
-            <span>Swipe / Scroll Horizontally to view full journey</span>
-          </div>
+        </motion.div>
+      </section>
+
+      {/* 1.5 TRUST STRIP */}
+      <TrustedBy />
+
+      {/* 2. INVESTOR DASHBOARD */}
+      <InvestorDashboard />
+
+      {/* 3. COMPANY TIMELINE */}
+      <CompanyTimeline />
+
+      {/* Independence Day Section */}
+      {isIndependenceDay && <IndependenceDaySection />}
+
+      {/* 3. PRODUCT SHOWCASE - BENTO BOX STYLE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-white mb-4">{t('home.ecosystemTitle')}</h2>
+          <p className="text-gray-400 max-w-2xl text-sm leading-relaxed">
+            {t('home.ecosystemSubtitle')}
+          </p>
         </div>
 
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* NextStep Core Showcase */}
+          <div className="col-span-1 md:col-span-8 glass-panel p-8 flex flex-col justify-between overflow-hidden relative group">
+            <div className="relative z-10">
+              <div className="flex items-center space-x-2 mb-4">
+                                <BookOpen className="w-5 h-5 text-accent" />
+                <h3 className="text-xl font-bold text-white">{t('home.nextstepTitle')}</h3>
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-accent/10 text-accent uppercase tracking-wider border border-accent/20">{t('home.activeBeta')}</span>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed max-w-md mb-8">
+                {t('home.nextstepDesc')}
+              </p>
+              
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start text-sm text-gray-300">
+                  <CheckCircle2 className="w-4 h-4 text-accent mr-2 mt-0.5 flex-shrink-0" />
+                  <span>                  {t('home.multilingualDiagnostics')}</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <CheckCircle2 className="w-4 h-4 text-accent mr-2 mt-0.5 flex-shrink-0" />
+                  <span>                  {t('home.realTimeAnalysis')}</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <CheckCircle2 className="w-4 h-4 text-accent mr-2 mt-0.5 flex-shrink-0" />
+                  <span>                  {t('home.privacyArchitecture')}</span>
+                </li>
+              </ul>
+              
+              <div className="flex flex-col items-start">
+                <Link href="/products" className="inline-flex items-center text-sm font-semibold text-white hover:text-accent transition-colors">
+                  {t('home.exploreNextStep')} <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
+                <WaitlistCounter />
+              </div>
+            </div>
+            
+            {/* UI Mockup Decorator */}
+            <div className="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 w-[400px] h-[300px] bg-[#1A1A1A] border border-white/10 rounded-tl-xl shadow-2xl p-4 opacity-50 group-hover:opacity-100 transition-opacity duration-500 hidden sm:block">
+              <div className="w-full h-8 border-b border-white/5 flex items-center space-x-2 mb-4">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
+              </div>
+              <div className="space-y-3">
+                <div className="h-4 w-1/3 bg-white/5 rounded" />
+                <div className="h-2 w-full bg-white/5 rounded" />
+                <div className="h-2 w-5/6 bg-white/5 rounded" />
+                <div className="grid grid-cols-2 gap-3 pt-4">
+                  <div className="h-20 bg-white/5 rounded" />
+                  <div className="h-20 bg-white/5 rounded" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* LaunchLab */}
+          <div className="col-span-1 md:col-span-4 glass-panel p-8 flex flex-col">
+            <div className="flex items-center space-x-2 mb-4">
+              <Layers className="w-5 h-5 text-blue-400" />
+              <h3 className="text-xl font-bold text-white">{t('home.launchlabTitle')}</h3>
+            </div>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                              {t('home.launchlabDescription')}
+            </p>
+            <div className="space-y-4 mb-6">
+              <div className="flex justify-between items-center text-xs text-gray-500">
+                <span>{t('home.avgLighthouseScore')}</span>
+                <span className="text-green-400 font-semibold">98+</span>
+              </div>
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-green-400 w-[98%]" />
+              </div>
+            </div>
+            <Link href="/products" className="inline-flex items-center text-sm font-semibold text-white hover:text-blue-400 transition-colors">
+              {t('home.viewCaseStudies')} <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+
+          {/* Infrastructure Metrics */}
+          <div className="col-span-1 md:col-span-4 glass-panel p-8">
+            <Activity className="w-5 h-5 text-gray-400 mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">{t('home.technicalRigorTitle')}</h3>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              {t('home.technicalRigorBody')}
+            </p>
+          </div>
+
+          {/* Product Roadmap */}
+          <div className="col-span-1 md:col-span-4">
+            <ProductRoadmap />
+          </div>
+
+          {/* Team Metric */}
+          <div className="col-span-1 md:col-span-4 glass-panel p-8 flex flex-col justify-between">
+            <div className="max-w-md">
+              <h3 className="text-lg font-bold text-white mb-2">{t('home.teamTitle')}</h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                {t('home.teamDescription')}
+              </p>
+              <Link href="/team" className="inline-flex items-center text-sm font-semibold text-white transition-colors">
+                {t('home.meetTeam')} <ArrowRight className="w-4 h-4 ml-1" />
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="w-8 h-8 rounded-full bg-white/5 border border-white/10" />
+              ))}
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">+13</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
     </div>
   );
 }

@@ -40,6 +40,27 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.glass-panel {
+  background: rgba(15, 25, 45, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glass-panel:hover {
+  border-color: rgba(29, 158, 117, 0.5); /* Teal accent */
+  box-shadow: 0 8px 32px 0 rgba(29, 158, 117, 0.15);
+}
+
+.glass-panel.accent-red:hover {
+  border-color: rgba(220, 38, 38, 0.5); 
+  box-shadow: 0 8px 32px 0 rgba(220, 38, 38, 0.15);
+}
+
+/* Legacy glass-card keeping it for compatibility during transition */
 .glass-card {
   background: rgba(31, 56, 100, 0.05);
   backdrop-filter: blur(12px);
