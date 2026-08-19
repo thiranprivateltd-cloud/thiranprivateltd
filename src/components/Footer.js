@@ -31,11 +31,12 @@ export default function Footer() {
 
   const quickLinks = [
     { name: t('nav.home'), href: '/' },
-    { name: t('nav.about'), href: '/about' },
+    { name: 'Story', href: '/story' },
+    { name: 'Work', href: '/work' },
     { name: t('nav.products'), href: '/products' },
     { name: t('nav.team'), href: '/team' },
     { name: t('nav.careers'), href: '/careers' },
-    { name: t('nav.investors'), href: '/investors' },
+    { name: 'Press', href: '/press' },
     { name: t('nav.contact'), href: '/contact' },
   ];
 
