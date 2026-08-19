@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import { Layers, BookOpen, Sparkles, Check, Send, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import QuizTeaser from '@/components/QuizTeaser';
 
 export default function Products() {
   const { t } = useTranslation();
@@ -291,6 +292,8 @@ export default function Products() {
 
             </div>
           </motion.div>
+
+          <QuizTeaser />
 
           {/* PRODUCT 3: FUTURE PRODUCT (VISION) */}
           <motion.div
