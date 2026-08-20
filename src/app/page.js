@@ -9,6 +9,7 @@ import { useIndependenceDay } from '@/components/independence-day/IndependenceDa
 import IndependenceDayBanner from '@/components/independence-day/IndependenceDayBanner';
 import IndependenceDaySection from '@/components/independence-day/IndependenceDaySection';
 import InvestorDashboard from '@/components/InvestorDashboard';
+import AchievementsSection from '@/components/AchievementsSection';
 import HeroParticles from '@/components/HeroParticles';
 import CompanyTimeline from '@/components/CompanyTimeline';
 import TrustedBy from '@/components/TrustedBy';
@@ -71,6 +72,9 @@ export default function Home() {
 
       {/* 2. INVESTOR DASHBOARD */}
       <InvestorDashboard />
+
+      {/* 2.5 ACHIEVEMENTS SECTION */}
+      <AchievementsSection />
 
       {/* 3. COMPANY TIMELINE */}
       <CompanyTimeline />
