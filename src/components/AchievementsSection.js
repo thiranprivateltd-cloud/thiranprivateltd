@@ -222,29 +222,109 @@ export default function AchievementsSection() {
 
         </div>
 
-        {/* CLOSING QUOTE SUB-SECTION */}
+        {/* MANIFESTO BRAND STATEMENT / CLOSING SLIDE */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 30 }}
-          whileInView={{ opacity: 1, scale: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative glass-panel rounded-3xl p-8 sm:p-12 md:p-16 border border-red-500/20 bg-gradient-to-b from-white/[0.03] via-red-950/10 to-black text-center overflow-hidden"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.15,
+                delayChildren: 0.1,
+              }
+            }
+          }}
+          className="relative w-full py-28 sm:py-36 md:py-48 bg-[#040404] text-center overflow-hidden flex flex-col items-center justify-center my-12"
         >
-          {/* Subtle horizontal glow dividers */}
-          <div className="h-px w-full max-w-xl mx-auto bg-gradient-to-r from-transparent via-red-500/40 to-transparent mb-10" />
+          {/* Extremely subtle radial glow (teal, <10% opacity) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-teal-500/[0.06] rounded-full blur-[140px] pointer-events-none -z-0" />
 
-          <p className="text-2xl sm:text-3xl md:text-5xl font-black font-heading leading-tight tracking-tight text-white max-w-5xl mx-auto">
-            "In 168 days:{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">1</span> company,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">19</span> believers,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">4</span> live products,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">2</span> client projects,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">500+</span> students waiting,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400">3</span> languages,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-400">zero</span> external funding. Just getting started. <span className="inline-block animate-pulse">🔴</span>"
-          </p>
+          <div className="relative z-10 max-w-4xl mx-auto px-4 space-y-4 sm:space-y-6">
+            
+            {/* Line 1 */}
+            <motion.h2 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+              }}
+              className="font-heading font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase text-white tracking-tight leading-none"
+            >
+              WE STARTED WITH <span className="text-teal-400">ZERO</span>.
+            </motion.h2>
 
-          <div className="h-px w-full max-w-xl mx-auto bg-gradient-to-r from-transparent via-red-500/40 to-transparent mt-10" />
+            {/* Line 2 */}
+            <motion.h2 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+              }}
+              className="font-heading font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase text-white tracking-tight leading-none"
+            >
+              NOT <span className="text-teal-400">ZERO</span> IDEAS.
+            </motion.h2>
+
+            {/* Line 3 */}
+            <motion.h2 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+              }}
+              className="font-heading font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase text-white tracking-tight leading-none"
+            >
+              NOT <span className="text-teal-400">ZERO</span> AMBITION.
+            </motion.h2>
+
+            {/* Line 4 */}
+            <motion.h2 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+              }}
+              className="font-heading font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase text-white tracking-tight leading-none pt-4 sm:pt-6"
+            >
+              JUST <span className="text-teal-400">ZERO</span> EXTERNAL FUNDING.
+            </motion.h2>
+
+            {/* Line 5 */}
+            <motion.h2 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+              }}
+              className="font-heading font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase text-white tracking-tight leading-none pt-6 sm:pt-10"
+            >
+              168 DAYS LATER,
+            </motion.h2>
+
+            {/* Line 6 */}
+            <motion.h2 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+              }}
+              className="font-heading font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase text-white tracking-tight leading-none"
+            >
+              WE'RE BUILDING.
+            </motion.h2>
+
+            {/* Line 7: THIRAN Signature */}
+            <motion.div 
+              variants={{
+                hidden: { opacity: 0, y: 15 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+              }}
+              className="pt-12 sm:pt-16 flex flex-col items-center"
+            >
+              <div className="w-16 sm:w-24 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent mb-6 sm:mb-8" />
+              <span className="font-heading font-bold text-xs sm:text-sm md:text-base tracking-[0.6em] text-gray-400 uppercase">
+                THIRAN
+              </span>
+            </motion.div>
+
+          </div>
         </motion.div>
 
       </div>
