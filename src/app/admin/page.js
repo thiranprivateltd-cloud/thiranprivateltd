@@ -356,17 +356,82 @@ export default function AdminPortal() {
     setMeetings(meetings.filter(m => m.id !== id));
   };
 
-  // EXPORT CSV HELPERS (Using Blob + UTF-8 BOM to prevent # character URL truncation in Excel)
+  // EXPORT ATTENDANCE WITH COLORED STATUS BOXES & EXACT COLUMNS:
+  // Meeting ID, Name, Role, Status (Present = Green, Absent = Red, NA = Grey), Duration (- if 0 mins)
   const handleExportAttendanceCSV = () => {
     if (meetings.length === 0) return;
-    let csv = "Meeting Number,Date,Member Name,Role,Email,Status,Entry Time,Exit Time,Duration (Mins)\n";
+
+    let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Attendance Report</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <style>
+        table { border-collapse: collapse; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; }
+        th { background-color: #1F3864; color: #FFFFFF; padding: 10px 16px; text-align: left; border: 1px solid #0F2342; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        td { padding: 8px 16px; border: 1px solid #E5E7EB; vertical-align: middle; }
+        .bg-green { background-color: #10B981; color: #FFFFFF; font-weight: bold; text-align: center; padding: 6px 12px; }
+        .bg-red { background-color: #EF4444; color: #FFFFFF; font-weight: bold; text-align: center; padding: 6px 12px; }
+        .bg-grey { background-color: #6B7280; color: #FFFFFF; font-weight: bold; text-align: center; padding: 6px 12px; }
+      </style>
+    </head>
+    <body>
+      <table>
+        <thead>
+          <tr>
+            <th>Meeting ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
     meetings.forEach(meet => {
       members.forEach(member => {
-        const log = meet.logs?.[member.id] || { status: 'NA', entryTime: '-', exitTime: '-', durationMinutes: 0 };
-        csv += `"${meet.number}","${meet.date}","${member.name}","${member.role}","${member.email || '-'}","${log.status}","${log.entryTime}","${log.exitTime}","${log.durationMinutes} mins"\n`;
+        const log = meet.logs?.[member.id] || { status: 'NA', durationMinutes: 0 };
+        
+        let statusClass = 'bg-grey';
+        if (log.status === 'Present') statusClass = 'bg-green';
+        else if (log.status === 'Absent') statusClass = 'bg-red';
+
+        const durationDisplay = (!log.durationMinutes || log.durationMinutes === 0) ? '-' : `${log.durationMinutes} mins`;
+
+        html += `
+          <tr>
+            <td><strong>${meet.number}</strong></td>
+            <td>${member.name}</td>
+            <td>${member.role}</td>
+            <td class="${statusClass}">${log.status}</td>
+            <td style="text-align: center;">${durationDisplay}</td>
+          </tr>`;
       });
     });
-    downloadCSV(csv, `Attendance_Report_${new Date().toISOString().split('T')[0]}.csv`);
+
+    html += `</tbody></table></body></html>`;
+
+    const blob = new Blob(["\uFEFF" + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Meeting_Attendance_${new Date().toISOString().split('T')[0]}.xls`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleExportWaitlistCSV = () => {
@@ -374,15 +439,12 @@ export default function AdminPortal() {
     let csv = "Type,Name/Email,Date,Details\n";
     waitlist.forEach(w => { csv += `"Waitlist","${w.name} (${w.email})","${w.date}","Lang: ${w.language}"\n`; });
     subscribers.forEach(s => { csv += `"Newsletter","${s.email}","${s.date}","Source: ${s.source}"\n`; });
-    downloadCSV(csv, `Waitlist_Subscribers_${new Date().toISOString().split('T')[0]}.csv`);
-  };
-
-  const downloadCSV = (rawCsvText, fileName) => {
-    const blob = new Blob(["\uFEFF" + rawCsvText], { type: 'text/csv;charset=utf-8;' });
+    
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", fileName);
+    link.setAttribute("download", `Waitlist_Subscribers_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
