@@ -3,74 +3,218 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
-import { Lock, LogOut, CheckSquare, Calendar, ClipboardList, ShieldAlert, Award, FileText } from 'lucide-react';
+import { 
+  Lock, 
+  LogOut, 
+  Calendar, 
+  ShieldAlert, 
+  FileText, 
+  Users, 
+  Video, 
+  ExternalLink, 
+  Clock, 
+  CheckCircle2, 
+  StopCircle,
+  Play
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function EmployeePortal() {
   const { t } = useTranslation();
-  const [password, setPassword] = useState('');
+  
+  // Auth state
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentMember, setCurrentMember] = useState(null);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('attendance'); // 'attendance' | 'booster' | 'notices' | 'tasks'
 
+  const [activeTab, setActiveTab] = useState('meetings'); // 'meetings' | 'members' | 'notices'
+
+  // Portal Data from storage
+  const [members, setMembers] = useState([]);
+  const [meetings, setMeetings] = useState([]);
+  const [notices, setNotices] = useState([]);
+
+  // Active Live Meet session tracking state
+  const [activeSession, setActiveSession] = useState(null); // { meetingId, entryTimestamp, entryTimeStr }
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // Load storage
   useEffect(() => {
     const sessionAuth = sessionStorage.getItem('thiran_portal_auth');
-    if (sessionAuth === 'true') {
-      setIsAuthenticated(true);
+    const savedMember = sessionStorage.getItem('thiran_current_member');
+
+    try {
+      const savedMembers = localStorage.getItem('thiran_members');
+      if (savedMembers) setMembers(JSON.parse(savedMembers));
+
+      const savedMeetings = localStorage.getItem('thiran_meetings');
+      if (savedMeetings) setMeetings(JSON.parse(savedMeetings));
+
+      const savedNotices = localStorage.getItem('thiran_notices');
+      if (savedNotices) setNotices(JSON.parse(savedNotices));
+
+      if (sessionAuth === 'true') {
+        setIsAuthenticated(true);
+        if (savedMember) setCurrentMember(JSON.parse(savedMember));
+      }
+    } catch (err) {
+      console.error("Error loading local storage in portal", err);
     }
   }, []);
 
+  // Live session timer interval
+  useEffect(() => {
+    let timer;
+    if (activeSession) {
+      timer = setInterval(() => {
+        setElapsedSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      setElapsedSeconds(0);
+    }
+    return () => clearInterval(timer);
+  }, [activeSession]);
+
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === 'thiranteam' || password === 'launch2026') {
+    const cleanEmail = emailInput.toLowerCase().trim();
+
+    // 1. Check if Master Admin Password
+    if (passwordInput === 'thiranadmin2026' || passwordInput === 'gsv2026' || passwordInput === 'admin2026') {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        colors: ['#1D9E75', '#F59E0B', '#3B82F6']
+      });
+      sessionStorage.setItem('thiran_admin_auth', 'true');
+      window.location.href = '/admin';
+      return;
+    }
+
+    // 2. Check if global password or individual member credential
+    const matchedMember = members.find(m => m.email === cleanEmail && m.password === passwordInput);
+    
+    if (matchedMember || passwordInput === 'thiranteam' || passwordInput === 'launch2026') {
       confetti({
         particleCount: 80,
         spread: 60,
         colors: ['#1F3864', '#1D9E75', '#4488CC']
       });
+
+      const memberObj = matchedMember || { name: 'Team Member', role: 'Volunteer', email: cleanEmail || 'team@thiran.in', id: 'MEM-TEMP' };
+      
       setIsAuthenticated(true);
+      setCurrentMember(memberObj);
       setError('');
-      setPassword('');
+      setPasswordInput('');
+      setEmailInput('');
+      
       sessionStorage.setItem('thiran_portal_auth', 'true');
+      sessionStorage.setItem('thiran_current_member', JSON.stringify(memberObj));
     } else {
-      setError(t('portal.errorMsg'));
-      setPassword('');
+      setError('Invalid email or password. For Admin Login, use master admin credentials.');
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setCurrentMember(null);
+    setActiveSession(null);
     sessionStorage.removeItem('thiran_portal_auth');
+    sessionStorage.removeItem('thiran_current_member');
   };
 
-  // Mock Portal Data
-  const attendanceLogs = [
-    { name: "Lohidharani G S", role: "HR Admin", status: "Active", logTime: "09:00 AM" },
-    { name: "Mukunthan S", role: "Tech Lead", status: "Active", logTime: "09:15 AM" },
-    { name: "Rahav V K", role: "Product Manager", status: "Active", logTime: "09:05 AM" },
-    { name: "Shaik Nabeela rayees", role: "Backend Developer", status: "Active", logTime: "09:10 AM" },
-    { name: "Samuel Ignitius", role: "Full Stack Dev", status: "Out of Office", logTime: "-" }
-  ];
+  // JOIN GOOGLE MEET (AUTOMATED ATTENDANCE & TIME TRACKING)
+  const handleJoinGoogleMeet = (meeting) => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    // Set active session
+    setActiveSession({
+      meetingId: meeting.id,
+      meetingNumber: meeting.number,
+      entryTimestamp: Date.now(),
+      entryTimeStr: timeStr
+    });
 
-  const boosterMetrics = [
-    { student: "Abhishek Kumar (Erode)", metric: "140 hrs psychometric analysis completed", rating: "★★★★★" },
-    { student: "Kavitha R (Chennai)", metric: "Skill gap bridge suggested (React Course)", rating: "★★★★★" },
-    { student: "Deepak S (Salem)", metric: "College finder mapped (Tier 1 CS)", rating: "★★★★☆" }
-  ];
+    // Update meeting logs in storage with Entry Time
+    if (currentMember && currentMember.id) {
+      const updatedMeetings = meetings.map(m => {
+        if (m.id === meeting.id) {
+          const existingLogs = m.logs || {};
+          const memberLog = existingLogs[currentMember.id] || {};
+          
+          return {
+            ...m,
+            logs: {
+              ...existingLogs,
+              [currentMember.id]: {
+                ...memberLog,
+                entryTime: timeStr,
+                exitTime: 'In Session...',
+                status: 'Present' // Marked present on join
+              }
+            }
+          };
+        }
+        return m;
+      });
 
-  const noticesList = [
-    { date: "May 28, 2026", title: "NextStep Waitlist Reaches 240+ Students", desc: "Fantastic sprint work by growth and marketing teams. Waitlist is now live in English, Tamil, and Hindi." },
-    { date: "May 24, 2026", title: "Team Meeting - NextStep Sprint 3 Review", desc: "All developer volunteers please join the discord workspace at 08:00 PM IST for UI integration review." }
-  ];
+      setMeetings(updatedMeetings);
+      localStorage.setItem('thiran_meetings', JSON.stringify(updatedMeetings));
+    }
 
-  const tasksList = [
-    { id: "NS-104", task: "Integrate psychometric scoring logic in NextStep frontend", owner: "Mukunthan S", status: "In Progress" },
-    { id: "NS-105", task: "Configure waitlist email persistence in MongoDB local cluster", owner: "Shaik Nabeela", status: "Completed" },
-    { id: "NS-106", task: "Aggregate Tier 2 and Tier 3 engineering college fee structures", owner: "Mogesh J", status: "Pending" }
-  ];
+    // Open Google Meet in new tab
+    window.open(meeting.meetLink, '_blank');
+  };
+
+  // LEAVE GOOGLE MEET
+  const handleLeaveGoogleMeet = () => {
+    if (!activeSession) return;
+
+    const now = new Date();
+    const exitTimeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const durationMins = Math.max(1, Math.round((Date.now() - activeSession.entryTimestamp) / 60000));
+
+    if (currentMember && currentMember.id) {
+      const updatedMeetings = meetings.map(m => {
+        if (m.id === activeSession.meetingId) {
+          const existingLogs = m.logs || {};
+          const memberLog = existingLogs[currentMember.id] || {};
+
+          return {
+            ...m,
+            logs: {
+              ...existingLogs,
+              [currentMember.id]: {
+                ...memberLog,
+                exitTime: exitTimeStr,
+                durationMinutes: durationMins,
+                status: durationMins >= 1 ? 'Present' : 'Absent'
+              }
+            }
+          };
+        }
+        return m;
+      });
+
+      setMeetings(updatedMeetings);
+      localStorage.setItem('thiran_meetings', JSON.stringify(updatedMeetings));
+    }
+
+    setActiveSession(null);
+  };
+
+  const formatElapsed = (sec) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+  };
 
   return (
-    <div className="min-h-screen py-24 relative overflow-hidden bg-[#0A0A0A] text-white">
+    <div className="min-h-screen py-24 relative overflow-hidden bg-[#0A0A0A] text-white font-body">
       {/* Background Orbs */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#1F3864]/10 rounded-full blur-[140px] pointer-events-none -z-10" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#1D9E75]/5 rounded-full blur-[120px] pointer-events-none -z-10" />
@@ -80,7 +224,7 @@ export default function EmployeePortal() {
         <AnimatePresence mode="wait">
           {!isAuthenticated ? (
             
-            /* LOGIN CARD */
+            /* MEMBER LOGIN CARD */
             <motion.div
               key="portal-login"
               initial={{ opacity: 0, y: 20 }}
@@ -88,63 +232,79 @@ export default function EmployeePortal() {
               exit={{ opacity: 0, y: -20 }}
               className="max-w-md mx-auto py-12"
             >
-              <div className="glass-card rounded-2xl p-8 border border-[#1F3864]/40 bg-[#0C0C0C]/90 text-center space-y-6">
-                
-                {/* Brand Logo */}
+              <div className="glass-card rounded-3xl p-8 border border-[#1F3864]/40 bg-[#0C0C0C]/90 text-center space-y-6">
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 bg-[#1F3864] rounded-xl flex items-center justify-center border border-white/10 shadow-lg mb-3">
                     <span className="font-heading text-white text-2xl font-black">T</span>
                   </div>
                   <h1 className="font-heading text-2xl font-black text-white uppercase">
-                    {t('portal.title')}
+                    Member Portal
                   </h1>
                   <p className="font-body text-gray-500 text-xs mt-1">
-                    {t('portal.subtitle')}
+                    Sign in with your individual member credentials
                   </p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4 text-left">
                   <div>
-                    <label className="text-[9px] font-heading font-bold uppercase tracking-widest text-gray-500 block mb-2">
-                      {t('portal.passwordPrompt')}
+                    <label className="text-[10px] font-heading font-bold uppercase tracking-widest text-gray-400 block mb-2">
+                      Member Email / Login ID
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="e.g. brundavanam@thiran.in"
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.02] text-white focus:outline-none focus:border-accent text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-heading font-bold uppercase tracking-widest text-gray-400 block mb-2">
+                      Personal Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3.5 w-4 h-4 text-gray-600" />
+                      <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-500" />
                       <input
                         type="password"
                         required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder={t('portal.passwordPlaceholder')}
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-white/10 bg-white/[0.02] text-white focus:outline-none focus:border-accent text-xs font-body transition-colors"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        placeholder="••••••••••••"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 bg-white/[0.02] text-white focus:outline-none focus:border-accent text-xs"
                       />
                     </div>
                   </div>
 
                   {error && (
-                    <div className="flex items-center space-x-2 text-[10px] text-red-500 font-heading font-semibold uppercase bg-red-950/20 border border-red-900/35 px-3 py-2 rounded-lg">
-                      <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                    <div className="flex items-center space-x-2 text-[11px] text-red-400 font-bold uppercase bg-red-950/30 border border-red-500/30 px-3.5 py-2.5 rounded-xl">
+                      <ShieldAlert className="w-4 h-4 flex-shrink-0 text-red-400" />
                       <span>{error}</span>
                     </div>
                   )}
 
                   <button
                     type="submit"
-                    className="w-full text-center py-3.5 rounded-xl bg-[#1D9E75] hover:bg-[#15805d] text-white font-heading font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center space-x-2"
+                    className="w-full text-center py-3.5 rounded-xl bg-[#1D9E75] hover:bg-[#15805d] text-white font-heading font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center space-x-2 shadow-lg shadow-teal-500/20"
                   >
-                    <span>{t('portal.loginBtn')}</span>
+                    <span>Sign In to Member Portal</span>
                   </button>
                 </form>
-                
-                <div className="text-[9px] text-gray-600 font-body uppercase tracking-wider">
-                  Authentication Restricted to Active Volunteers Only
-                </div>
 
+                <div className="pt-4 border-t border-white/5">
+                  <a
+                    href="/admin"
+                    className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-teal-400 hover:text-teal-300 font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 transition-all block text-center"
+                  >
+                    <span>🛡️ Switch to Executive Admin Login (`/admin`)</span>
+                  </a>
+                </div>
               </div>
             </motion.div>
           ) : (
             
-            /* PORTAL DASHBOARD */
+            /* MEMBER PORTAL DASHBOARD */
             <motion.div
               key="portal-dashboard"
               initial={{ opacity: 0, scale: 0.98 }}
@@ -152,7 +312,33 @@ export default function EmployeePortal() {
               exit={{ opacity: 0 }}
               className="space-y-8"
             >
-              
+              {/* Active Meeting Live Session Banner */}
+              {activeSession && (
+                <div className="glass-panel p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 flex flex-col sm:flex-row justify-between items-center gap-4 animate-pulse">
+                  <div className="flex items-center space-x-3">
+                    <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
+                    <div>
+                      <h4 className="font-heading font-bold text-white text-sm">
+                        Active in {activeSession.meetingNumber}
+                      </h4>
+                      <div className="text-xs text-emerald-300 flex items-center space-x-3 mt-0.5">
+                        <span>Entry Time: {activeSession.entryTimeStr}</span>
+                        <span>•</span>
+                        <span className="font-mono font-bold">Time Logged: {formatElapsed(elapsedSeconds)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleLeaveGoogleMeet}
+                    className="px-4 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 font-heading font-bold text-xs uppercase tracking-wider flex items-center space-x-2 transition-colors cursor-pointer"
+                  >
+                    <StopCircle className="w-4 h-4" />
+                    <span>Leave Meet & Log Hours</span>
+                  </button>
+                </div>
+              )}
+
               {/* Header Bar */}
               <div className="flex flex-col sm:flex-row justify-between items-center bg-[#0C0C0C]/80 border border-white/5 rounded-2xl p-6 gap-4">
                 <div className="flex items-center space-x-4">
@@ -161,10 +347,10 @@ export default function EmployeePortal() {
                   </div>
                   <div>
                     <h2 className="font-heading text-lg font-black text-white uppercase leading-none">
-                      {t('portal.title')}
+                      Welcome, {currentMember?.name || 'Team Member'}
                     </h2>
-                    <span className="text-[9px] font-heading font-bold text-accent tracking-wider uppercase block mt-1">
-                      Thiran Ecosystem Internal Workspace
+                    <span className="text-[10px] font-heading font-bold text-accent tracking-wider uppercase block mt-1">
+                      {currentMember?.role || 'Member'} • {currentMember?.email || 'Authenticated'}
                     </span>
                   </div>
                 </div>
@@ -174,44 +360,41 @@ export default function EmployeePortal() {
                   className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white font-heading font-bold text-[10px] uppercase tracking-wider flex items-center space-x-2 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>{t('portal.logoutBtn')}</span>
+                  <span>Logout</span>
                 </button>
               </div>
 
               {/* Layout split */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
-                {/* Tab select side */}
+                {/* Navigation Menu */}
                 <div className="lg:col-span-3 space-y-4">
                   <div className="glass-card rounded-2xl p-4 border border-white/5 bg-[#0C0C0C]/65 space-y-2">
                     
                     <span className="text-[8px] font-heading font-bold text-gray-500 uppercase tracking-widest block mb-4 px-2">
-                      Portal Sections
+                      Portal Workspace
                     </span>
 
-                    {/* Attendance */}
                     <button
-                      onClick={() => setActiveTab('attendance')}
+                      onClick={() => setActiveTab('meetings')}
                       className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-2.5 transition-colors cursor-pointer ${
-                        activeTab === 'attendance' ? 'bg-[#1F3864] text-white border border-[#4488CC]/30' : 'text-gray-400 hover:bg-white/5'
+                        activeTab === 'meetings' ? 'bg-[#1F3864] text-white border border-[#4488CC]/30' : 'text-gray-400 hover:bg-white/5'
                       }`}
                     >
-                      <ClipboardList className="w-4 h-4" />
-                      <span>{t('portal.attendanceTab')}</span>
+                      <Video className="w-4 h-4" />
+                      <span>Google Meet & Attendance</span>
                     </button>
 
-                    {/* Booster */}
                     <button
-                      onClick={() => setActiveTab('booster')}
+                      onClick={() => setActiveTab('members')}
                       className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-2.5 transition-colors cursor-pointer ${
-                        activeTab === 'booster' ? 'bg-[#1F3864] text-white border border-[#4488CC]/30' : 'text-gray-400 hover:bg-white/5'
+                        activeTab === 'members' ? 'bg-[#1F3864] text-white border border-[#4488CC]/30' : 'text-gray-400 hover:bg-white/5'
                       }`}
                     >
-                      <Award className="w-4 h-4" />
-                      <span>{t('portal.boosterTab')}</span>
+                      <Users className="w-4 h-4" />
+                      <span>Team Roster</span>
                     </button>
 
-                    {/* Notices */}
                     <button
                       onClick={() => setActiveTab('notices')}
                       className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-2.5 transition-colors cursor-pointer ${
@@ -219,18 +402,7 @@ export default function EmployeePortal() {
                       }`}
                     >
                       <FileText className="w-4 h-4" />
-                      <span>{t('portal.noticesTab')}</span>
-                    </button>
-
-                    {/* Tasks */}
-                    <button
-                      onClick={() => setActiveTab('tasks')}
-                      className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-2.5 transition-colors cursor-pointer ${
-                        activeTab === 'tasks' ? 'bg-[#1F3864] text-white border border-[#4488CC]/30' : 'text-gray-400 hover:bg-white/5'
-                      }`}
-                    >
-                      <CheckSquare className="w-4 h-4" />
-                      <span>{t('portal.tasksTab')}</span>
+                      <span>Circulars</span>
                     </button>
 
                   </div>
@@ -241,79 +413,106 @@ export default function EmployeePortal() {
                   <div className="glass-card rounded-2xl p-6 md:p-8 border border-white/5 bg-[#0C0C0C]/40 min-h-[380px]">
                     <AnimatePresence mode="wait">
                       
-                      {/* ATTENDANCE SECTION */}
-                      {activeTab === 'attendance' && (
+                      {/* GOOGLE MEET & ATTENDANCE LOGS TAB */}
+                      {activeTab === 'meetings' && (
                         <motion.div
-                          key="attendance-tab"
+                          key="meetings-tab"
                           initial={{ opacity: 0, x: 10 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -10 }}
                           className="space-y-6"
                         >
-                          <h3 className="font-heading text-lg font-black uppercase text-white mb-4">
-                            {t('portal.portal1Title')} — Attendance
-                          </h3>
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse text-xs md:text-sm font-body text-gray-300">
-                              <thead>
-                                <tr className="border-b border-white/10 text-gray-500 font-heading uppercase text-[10px] tracking-wider">
-                                  <th className="pb-3">Volunteer</th>
-                                  <th className="pb-3">Role</th>
-                                  <th className="pb-3">Sprint Status</th>
-                                  <th className="pb-3">Daily Login</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {attendanceLogs.map((log, idx) => (
-                                  <tr key={idx} className="border-b border-white/5">
-                                    <td className="py-4 font-heading font-black text-white">{log.name}</td>
-                                    <td className="py-4">{log.role}</td>
-                                    <td className="py-4">
-                                      <span className={`px-2 py-0.5 rounded text-[9px] font-heading font-bold uppercase tracking-wider ${
-                                        log.status === 'Active' ? 'bg-[#1D9E75]/10 text-accent border border-[#1D9E75]/20' : 'bg-white/5 text-gray-500 border border-white/5'
-                                      }`}>
-                                        {log.status}
-                                      </span>
-                                    </td>
-                                    <td className="py-4 text-gray-500">{log.logTime}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                          <div className="flex justify-between items-center">
+                            <h3 className="font-heading text-lg font-black uppercase text-white">
+                              Google Meet Sessions & Attendance
+                            </h3>
                           </div>
+
+                          {meetings.length === 0 ? (
+                            <div className="text-center py-16 text-gray-500 text-sm font-heading uppercase tracking-wider">
+                              No Google Meet sessions scheduled yet.
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {meetings.map((meet) => {
+                                const myLog = currentMember?.id ? meet.logs?.[currentMember.id] : null;
+                                return (
+                                  <div key={meet.id} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div className="space-y-1">
+                                      <div className="flex items-center space-x-3">
+                                        <h4 className="font-heading font-bold text-white text-base">{meet.number}</h4>
+                                        <span className={`px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                                          meet.status === 'Active' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-gray-700 text-gray-400'
+                                        }`}>
+                                          {meet.status}
+                                        </span>
+                                      </div>
+                                      <div className="text-xs text-gray-400 flex items-center space-x-3">
+                                        <span>📅 {meet.date}</span>
+                                        <span>⏰ {meet.startTime} - {meet.endTime}</span>
+                                      </div>
+
+                                      {/* Individual log details */}
+                                      {myLog && (
+                                        <div className="text-xs text-gray-400 mt-2 flex flex-wrap items-center gap-3 pt-2 border-t border-white/5 font-mono">
+                                          <span>Entry: <strong className="text-teal-400">{myLog.entryTime}</strong></span>
+                                          <span>Exit: <strong className="text-amber-400">{myLog.exitTime}</strong></span>
+                                          <span>Duration: <strong className="text-white">{myLog.durationMinutes} mins</strong></span>
+                                          <span>Status: <strong className={myLog.status === 'Present' ? 'text-emerald-400' : 'text-red-400'}>{myLog.status}</strong></span>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {meet.status === 'Active' && (
+                                      <button
+                                        onClick={() => handleJoinGoogleMeet(meet)}
+                                        className="w-full sm:w-auto px-5 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-black font-heading font-bold text-xs uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center space-x-2 shadow-lg shadow-teal-500/20"
+                                      >
+                                        <Video className="w-4 h-4" />
+                                        <span>Join Google Meet</span>
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </motion.div>
                       )}
 
-                      {/* BOOSTER SECTION */}
-                      {activeTab === 'booster' && (
+                      {/* MEMBERS ROSTER TAB */}
+                      {activeTab === 'members' && (
                         <motion.div
-                          key="booster-tab"
+                          key="members-tab"
                           initial={{ opacity: 0, x: 10 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -10 }}
                           className="space-y-6"
                         >
                           <h3 className="font-heading text-lg font-black uppercase text-white mb-4">
-                            {t('portal.portal1Title')} — Student Boosters
+                            Company Team Roster
                           </h3>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {boosterMetrics.map((met, idx) => (
-                              <div key={idx} className="glass-card rounded-xl p-6 border border-white/5 bg-[#080808]">
-                                <span className="font-heading text-xs font-bold text-accent uppercase tracking-wider block mb-2">
-                                  {met.student}
-                                </span>
-                                <p className="font-body text-xs text-gray-400 leading-normal">
-                                  {met.metric}
-                                </p>
-                                <span className="text-[#4488CC] block mt-4 text-xs tracking-widest">{met.rating}</span>
-                              </div>
-                            ))}
-                          </div>
+                          {members.length === 0 ? (
+                            <div className="text-center py-16 text-gray-500 text-sm font-heading uppercase tracking-wider">
+                              No team members listed yet.
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {members.map((member) => (
+                                <div key={member.id} className="p-5 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
+                                  <h4 className="font-heading font-bold text-white text-base">{member.name}</h4>
+                                  <span className="text-xs font-bold text-accent uppercase tracking-wider block">{member.role}</span>
+                                  <p className="text-xs text-gray-400 leading-relaxed">{member.responsibilities}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </motion.div>
                       )}
 
-                      {/* NOTICES SECTION */}
+                      {/* NOTICES TAB */}
                       {activeTab === 'notices' && (
                         <motion.div
                           key="notices-tab"
@@ -323,72 +522,26 @@ export default function EmployeePortal() {
                           className="space-y-6"
                         >
                           <h3 className="font-heading text-lg font-black uppercase text-white mb-4">
-                            {t('portal.portal2Title')} — Notices
+                            Official Circulars & Notices
                           </h3>
                           
-                          <div className="space-y-4">
-                            {noticesList.map((not, idx) => (
-                              <div key={idx} className="glass-card rounded-xl p-6 border border-white/5 bg-[#080808]">
-                                <div className="flex justify-between items-start mb-3">
-                                  <h4 className="font-heading text-sm font-black text-white uppercase">
-                                    {not.title}
-                                  </h4>
-                                  <span className="text-[9px] font-heading font-bold text-gray-500 uppercase tracking-widest">
-                                    {not.date}
-                                  </span>
+                          {notices.length === 0 ? (
+                            <div className="text-center py-16 text-gray-500 text-sm font-heading uppercase tracking-wider">
+                              No active circulars.
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {notices.map((not) => (
+                                <div key={not.id} className="glass-card rounded-xl p-5 border border-white/5 bg-[#080808]">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-heading text-sm font-black text-white uppercase">{not.title}</h4>
+                                    <span className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-widest">{not.date}</span>
+                                  </div>
+                                  <p className="font-body text-xs text-gray-400 leading-relaxed">{not.desc}</p>
                                 </div>
-                                <p className="font-body text-xs text-gray-400 leading-relaxed">
-                                  {not.desc}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {/* TASKS SECTION */}
-                      {activeTab === 'tasks' && (
-                        <motion.div
-                          key="tasks-tab"
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -10 }}
-                          className="space-y-6"
-                        >
-                          <h3 className="font-heading text-lg font-black uppercase text-white mb-4">
-                            {t('portal.portal2Title')} — Tasks & Sprint Backlog
-                          </h3>
-                          
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse text-xs md:text-sm font-body text-gray-300">
-                              <thead>
-                                <tr className="border-b border-white/10 text-gray-500 font-heading uppercase text-[10px] tracking-wider">
-                                  <th className="pb-3">Task ID</th>
-                                  <th className="pb-3">Sprint Task</th>
-                                  <th className="pb-3">Assignee</th>
-                                  <th className="pb-3">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {tasksList.map((tsk, idx) => (
-                                  <tr key={idx} className="border-b border-white/5">
-                                    <td className="py-4 font-heading font-bold text-[#4488CC]">{tsk.id}</td>
-                                    <td className="py-4 text-white leading-normal max-w-sm">{tsk.task}</td>
-                                    <td className="py-4">{tsk.owner}</td>
-                                    <td className="py-4">
-                                      <span className={`px-2.5 py-0.5 rounded text-[9px] font-heading font-bold uppercase tracking-wider ${
-                                        tsk.status === 'Completed' ? 'bg-[#1D9E75]/10 text-accent border border-[#1D9E75]/20' :
-                                        tsk.status === 'In Progress' ? 'bg-primary/10 text-primary border border-primary/20' :
-                                        'bg-white/5 text-gray-500 border border-white/5'
-                                      }`}>
-                                        {tsk.status}
-                                      </span>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
+                              ))}
+                            </div>
+                          )}
                         </motion.div>
                       )}
 
