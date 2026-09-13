@@ -763,10 +763,8 @@ export function LanguageProvider({ children }) {
       }
     }
     
-    const introSeen = sessionStorage.getItem('thiran_intro_seen');
-    if (introSeen === 'true') {
-      setShowIntro(false);
-    }
+    // Always initialize showIntro to true so every refresh displays the animation properly
+    setShowIntro(true);
   }, []);
 
   const setLanguage = (lang) => {
@@ -779,7 +777,6 @@ export function LanguageProvider({ children }) {
   const completeIntro = (lang) => {
     setLanguage(lang);
     setShowIntro(false);
-    sessionStorage.setItem('thiran_intro_seen', 'true');
   };
 
   // Helper function to translate keys using dot notation (e.g. 'home.title')
