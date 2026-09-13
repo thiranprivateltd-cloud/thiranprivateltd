@@ -1,6 +1,7 @@
 'use client';
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import GlassCard from '@/components/GlassCard';
 
 // Counter component for animated numbers
 const Counter = ({ from = 0, to, duration = 2, suffix = '' }) => {
@@ -16,7 +17,6 @@ const Counter = ({ from = 0, to, duration = 2, suffix = '' }) => {
       const updateCount = (timestamp) => {
         if (!startTime) startTime = timestamp;
         const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
-        // easeOutQuart
         const easeProgress = 1 - Math.pow(1 - progress, 4);
         setCount(Math.floor(easeProgress * (to - from) + from));
         
@@ -47,10 +47,10 @@ export default function InvestorDashboard() {
   }, []);
 
   const metrics = [
-    { label: "NextStep Waitlist", value: 500, suffix: "+", accent: "accent-red" },
-    { label: "LaunchLab Projects", value: 12, suffix: "", accent: "" },
-    { label: "Team Size", value: 19, suffix: "", accent: "" },
-    { label: "Days Since Founding", value: daysSince, suffix: "", accent: "" },
+    { label: "NextStep Waitlist", value: 500, suffix: "+", highlight: true },
+    { label: "LaunchLab Projects", value: 12, suffix: "", highlight: false },
+    { label: "Team Size", value: 19, suffix: "", highlight: false },
+    { label: "Days Since Founding", value: daysSince, suffix: "", highlight: false },
   ];
 
   const containerVariants = {
@@ -62,54 +62,38 @@ export default function InvestorDashboard() {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
   return (
-    <section className="py-24 relative overflow-hidden bg-[#0A0A0A]">
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="mb-12"
-        >
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <h2 className="text-sm font-bold tracking-widest uppercase text-gray-400">Live Investor Dashboard</h2>
-          </div>
-          <h3 className="text-3xl md:text-5xl font-black font-heading text-white tracking-tight">
-            Real-time Growth Metrics
-          </h3>
-        </motion.div>
-
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {metrics.map((metric, idx) => (
-            <motion.div 
-              key={idx} 
-              variants={itemVariants}
-              className={`glass-panel p-8 flex flex-col justify-between h-48 group ${metric.accent}`}
+    <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-6"
+      >
+        {metrics.map((metric, index) => (
+          <motion.div key={index} variants={itemVariants}>
+            <GlassCard
+              variant="default"
+              showMotif={metric.highlight}
+              className={`text-center p-6 ${metric.highlight ? 'border-[#D4A54A]/40' : ''}`}
             >
-              <h4 className="text-gray-400 font-medium text-sm tracking-wide">{metric.label}</h4>
-              <div className="text-5xl font-black font-heading text-white group-hover:scale-105 transition-transform duration-300 origin-left">
-                {metric.value > 0 ? (
-                  <Counter from={0} to={metric.value} suffix={metric.suffix} />
-                ) : (
-                  <span>0</span>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
+              <h4 className="text-3xl md:text-4xl font-extrabold font-heading text-white mb-1">
+                <span className={metric.highlight ? "text-[#D4A54A] text-glow-gold" : "text-white"}>
+                  <Counter to={metric.value} suffix={metric.suffix} />
+                </span>
+              </h4>
+              <p className="text-xs uppercase tracking-wider text-[#B8A9A0] font-bold">
+                {metric.label}
+              </p>
+            </GlassCard>
+          </motion.div>
+        ))}
+      </motion.div>
     </section>
   );
 }

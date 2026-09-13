@@ -6,7 +6,7 @@ import { MessageSquare, X, Send } from 'lucide-react';
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'ai', text: "Hi, I'm the Thiran AI. How can I help you navigate your career today?" }
+    { role: 'ai', text: "Hi, I'm the Thiran AI. How can I help you navigate your educational and career journey today?" }
   ]);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
@@ -27,19 +27,20 @@ export default function Chatbot() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'ai', 
-        text: "This is a placeholder response. In production, this will be connected to our NextStep cognitive engine." 
+        text: "This is an AI guidance preview. In production, this connects to our NextStep cognitive engine for regional student advisory." 
       }]);
     }, 1000);
   };
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 left-6 z-40">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-14 h-14 rounded-full bg-teal-500 hover:bg-teal-400 text-black flex items-center justify-center shadow-[0_0_20px_rgba(29,158,117,0.5)] transition-transform hover:scale-110 ${isOpen ? 'rotate-90 scale-0' : 'rotate-0 scale-100'}`}
+          className={`w-12 h-12 rounded-full bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] flex items-center justify-center shadow-[0_0_20px_rgba(212,165,74,0.35)] transition-all hover:scale-105 cursor-pointer ${isOpen ? 'rotate-90 scale-0' : 'rotate-0 scale-100'}`}
+          title="Ask Thiran AI"
         >
-          <MessageSquare className="w-6 h-6" />
+          <MessageSquare className="w-5 h-5" />
         </button>
       </div>
 
@@ -50,39 +51,39 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] glass-panel border border-white/20 rounded-2xl flex flex-col overflow-hidden z-50 shadow-2xl"
+            className="fixed bottom-22 left-6 w-80 sm:w-96 h-[480px] glass-panel border border-[#D4A54A]/30 bg-[#1A1425]/95 rounded-2xl flex flex-col overflow-hidden z-50 shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/50">
+            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#2B1420]/80">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-black font-bold text-xs">
+                <div className="w-8 h-8 rounded-full bg-[#D4A54A] flex items-center justify-center text-[#1A1425] font-bold text-xs">
                   AI
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-sm">Thiran AI</h3>
-                  <p className="text-teal-400 text-[10px] uppercase tracking-widest font-bold">Online</p>
+                  <h3 className="text-white font-bold text-sm">Thiran Guidance AI</h3>
+                  <p className="text-[#D4A54A] text-[10px] uppercase tracking-widest font-bold">Online</p>
                 </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((msg, idx) => (
-                <div 
-                  key={idx} 
+            <div className="flex-1 p-4 overflow-y-auto space-y-4">
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div 
-                    className={`max-w-[80%] rounded-xl p-3 text-sm ${
-                      msg.role === 'user' 
-                        ? 'bg-teal-500 text-black rounded-tr-sm' 
-                        : 'bg-white/10 text-white rounded-tl-sm border border-white/5'
+                  <div
+                    className={`max-w-[80%] rounded-xl p-3 text-xs leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-[#D4A54A] text-[#1A1425] font-medium'
+                        : 'bg-[#2B1420] text-[#FDFBF7] border border-[#D4A54A]/20'
                     }`}
                   >
                     {msg.text}
@@ -92,24 +93,22 @@ export default function Chatbot() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="p-4 border-t border-white/10 bg-black/50">
-              <form onSubmit={handleSubmit} className="relative">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask me anything..."
-                  className="w-full bg-white/5 border border-white/10 rounded-full px-4 py-3 pr-12 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-teal-500 transition-colors"
-                />
-                <button 
-                  type="submit"
-                  className="absolute right-1.5 top-1.5 w-9 h-9 bg-teal-500 hover:bg-teal-400 rounded-full flex items-center justify-center text-black transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
+            {/* Input Form */}
+            <form onSubmit={handleSubmit} className="p-3 border-t border-white/10 bg-black/40 flex space-x-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Ask about careers, courses, admissions..."
+                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A54A]/50"
+              />
+              <button
+                type="submit"
+                className="bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] p-2 rounded-lg transition-colors cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>

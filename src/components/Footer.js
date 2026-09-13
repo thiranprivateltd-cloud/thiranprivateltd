@@ -2,29 +2,16 @@
 
 import Link from 'next/link';
 import { useTranslation } from '@/context/LanguageContext';
-import { MessageSquare, ArrowUpRight, ChevronDown, Mail, ArrowRight, Shield, Globe, Sparkles } from 'lucide-react';
+import { MessageSquare, ArrowUpRight, Mail, ArrowRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
-import { useIndependenceDay } from '@/components/independence-day/IndependenceDayProvider';
-import TricolorBar from '@/components/independence-day/TricolorBar';
+import { useState } from 'react';
+import { JaliPattern, TempleSilhouette } from '@/components/HeritageMotifs';
+import AnimatedJali from '@/components/AnimatedJali';
 
 export default function Footer() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
-  const [portalOpen, setPortalOpen] = useState(false);
-  const portalRef = useRef(null);
-  const isIndependenceDay = useIndependenceDay();
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (portalRef.current && !portalRef.current.contains(e.target)) {
-        setPortalOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -42,8 +29,10 @@ export default function Footer() {
 
   const companyLinks = [
     { name: t('nav.home'), href: '/' },
+    { name: 'Vision & Mission', href: '/vision' },
     { name: 'Story', href: '/story' },
-    { name: 'Work & Cases', href: '/work' },
+    { name: 'Proof of Execution', href: '/work' },
+    { name: 'Updates & Build Log', href: '/updates' },
     { name: t('nav.team'), href: '/team' },
     { name: 'Investors', href: '/investors' },
     { name: t('nav.careers'), href: '/careers' },
@@ -59,24 +48,24 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative bg-[#060606] border-t border-white/10 pt-20 pb-8 overflow-hidden">
+    <footer className="relative bg-[#1A1425] border-t border-[#D4A54A]/20 pt-20 pb-8 overflow-hidden">
       {/* Background Orbs & Glow */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[300px] bg-teal-900/10 rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-blue-900/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[300px] bg-[#D4A54A]/5 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-[#2B1420]/40 rounded-full blur-[140px] pointer-events-none -z-10" />
 
       {/* Massive Background Typography Watermark */}
-      <div className="absolute bottom-[-2vw] left-1/2 -translate-x-1/2 text-[18vw] font-black font-heading text-white/[0.015] uppercase tracking-tighter select-none pointer-events-none whitespace-nowrap">
+      <div className="absolute bottom-[-2vw] left-1/2 -translate-x-1/2 text-[18vw] font-black font-heading text-white/[0.02] uppercase tracking-tighter select-none pointer-events-none whitespace-nowrap">
         THIRAN
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* TOP CALLOUT: Newsletter / Waitlist Glass Box */}
-        <div className="glass-panel p-8 md:p-10 rounded-3xl mb-16 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 border border-white/10">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+        {/* TOP CALLOUT: Newsletter Glass Box */}
+        <div className="glass-panel p-8 md:p-10 rounded-3xl mb-16 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 border border-[#D4A54A]/25">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4A54A]/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="space-y-2 text-center lg:text-left max-w-xl">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/10 text-teal-400 text-[10px] font-heading font-bold uppercase tracking-widest">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[#D4A54A]/30 bg-[#D4A54A]/10 text-[#D4A54A] text-[10px] font-heading font-bold uppercase tracking-widest">
               <Sparkles className="w-3 h-3" />
               <span>Stay Updated</span>
             </div>
@@ -84,7 +73,7 @@ export default function Footer() {
               Join the Thiran Intelligence Network
             </h3>
             <p className="text-gray-400 text-xs md:text-sm">
-              Get monthly updates on product deployments, career insights, and investment announcements.
+              Get monthly notes on product deployments, career insights, and ecosystem announcements.
             </p>
           </div>
 
@@ -97,12 +86,12 @@ export default function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email..."
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-full pl-11 pr-4 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-teal-500/50 transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-full pl-11 pr-4 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A54A]/60 transition-colors"
               />
             </div>
             <button
               type="submit"
-              className="w-full sm:w-auto px-6 py-3 rounded-full bg-teal-500 hover:bg-teal-400 text-black font-heading font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 flex items-center justify-center space-x-2 shadow-lg shadow-teal-500/20 cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 flex items-center justify-center space-x-2 shadow-lg shadow-[#D4A54A]/20 cursor-pointer"
             >
               <span>{subscribed ? "Subscribed!" : "Subscribe"}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -130,7 +119,7 @@ export default function Footer() {
             </p>
 
             {/* Headquarters details */}
-            <div className="text-xs text-gray-500 space-y-1 font-mono">
+            <div className="text-xs text-gray-400 space-y-1 font-mono">
               <p>📍 HQ: Chennai, Tamil Nadu, India</p>
               <p>🌱 Origin: Erode, Tamil Nadu</p>
             </div>
@@ -141,7 +130,7 @@ export default function Footer() {
                 href="https://youtube.com/@codewithgsv?si=rOLkfx6fwxc45bS4"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all hover:scale-110"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-[#C1440E] hover:bg-[#C1440E]/10 hover:border-[#C1440E]/30 transition-all hover:scale-110"
                 title="Code with GSV YouTube"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -165,7 +154,7 @@ export default function Footer() {
                 href="https://wa.me/918056547565"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-green-500 hover:bg-green-500/10 hover:border-green-500/30 transition-all hover:scale-110"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all hover:scale-110"
                 title="WhatsApp Direct"
               >
                 <MessageSquare className="w-4 h-4" />
@@ -174,7 +163,7 @@ export default function Footer() {
                 href="https://www.linkedin.com/in/varshithgs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all hover:scale-110"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-[#D4A54A] hover:bg-[#D4A54A]/10 hover:border-[#D4A54A]/30 transition-all hover:scale-110"
                 title="LinkedIn"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -186,7 +175,7 @@ export default function Footer() {
 
           {/* Column 2: Ecosystem Products */}
           <div>
-            <h4 className="font-heading text-xs font-bold uppercase tracking-widest text-teal-400 mb-6">
+            <h4 className="font-heading text-xs font-bold uppercase tracking-widest text-[#D4A54A] mb-6">
               Ecosystem
             </h4>
             <ul className="space-y-3 text-xs">
@@ -197,13 +186,13 @@ export default function Footer() {
                       href={prod.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-400 hover:text-white transition-colors flex items-center group"
+                      className="text-gray-400 hover:text-[#D4A54A] transition-colors flex items-center group"
                     >
                       <span>{prod.name}</span>
-                      <ArrowUpRight className="w-3 h-3 ml-1 text-gray-600 group-hover:text-teal-400 transition-colors" />
+                      <ArrowUpRight className="w-3 h-3 ml-1 text-gray-600 group-hover:text-[#D4A54A] transition-colors" />
                     </a>
                   ) : (
-                    <Link href={prod.href} className="text-gray-400 hover:text-white transition-colors">
+                    <Link href={prod.href} className="text-gray-400 hover:text-[#D4A54A] transition-colors">
                       {prod.name}
                     </Link>
                   )}
@@ -214,13 +203,13 @@ export default function Footer() {
 
           {/* Column 3: Company */}
           <div>
-            <h4 className="font-heading text-xs font-bold uppercase tracking-widest text-teal-400 mb-6">
+            <h4 className="font-heading text-xs font-bold uppercase tracking-widest text-[#D4A54A] mb-6">
               Company
             </h4>
             <ul className="space-y-3 text-xs">
               {companyLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
+                  <Link href={link.href} className="text-gray-400 hover:text-[#D4A54A] transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -230,7 +219,7 @@ export default function Footer() {
 
           {/* Column 4: Portals & Internal */}
           <div>
-            <h4 className="font-heading text-xs font-bold uppercase tracking-widest text-teal-400 mb-6">
+            <h4 className="font-heading text-xs font-bold uppercase tracking-widest text-[#D4A54A] mb-6">
               Portals
             </h4>
             <ul className="space-y-3 text-xs">
@@ -240,15 +229,15 @@ export default function Footer() {
                     href={portal.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors flex items-center group"
+                    className="text-gray-400 hover:text-[#D4A54A] transition-colors flex items-center group"
                   >
                     <span>{portal.name}</span>
-                    <ArrowUpRight className="w-3 h-3 ml-1 text-gray-600 group-hover:text-teal-400 transition-colors" />
+                    <ArrowUpRight className="w-3 h-3 ml-1 text-gray-600 group-hover:text-[#D4A54A] transition-colors" />
                   </a>
                 </li>
               ))}
               <li>
-                <Link href="/portal" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/portal" className="text-gray-400 hover:text-[#D4A54A] transition-colors">
                   LaunchLab Client Portal
                 </Link>
               </li>
@@ -256,8 +245,8 @@ export default function Footer() {
 
             {/* Status indicator */}
             <div className="mt-8 pt-4 border-t border-white/5">
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#7A9B76]/10 border border-[#7A9B76]/25 text-[#7A9B76] text-[10px] font-mono">
+                <span className="w-2 h-2 rounded-full bg-[#7A9B76] animate-ping" />
                 <span>All Systems Operational</span>
               </div>
             </div>
@@ -268,21 +257,13 @@ export default function Footer() {
         {/* BOTTOM BAR */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-xs">
           <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
-            <p className="text-gray-500 text-[11px]">
+            <p className="text-gray-400 text-[11px]">
               © {new Date().getFullYear()} Thiran Private Ltd. All rights reserved.
             </p>
-            {isIndependenceDay && (
-              <>
-                <span className="hidden md:inline-block text-gray-700">|</span>
-                <span className="text-[10px] uppercase tracking-wider font-bold text-[#FF9933]">
-                  Jai Hind — Happy Independence Day 🇮🇳
-                </span>
-              </>
-            )}
           </div>
 
           {/* Mantra */}
-          <div className="flex items-center space-x-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.02] text-[10px] font-heading font-black tracking-widest text-gray-400 uppercase">
+          <div className="flex items-center space-x-2 px-4 py-1.5 rounded-full border border-[#D4A54A]/25 bg-[#D4A54A]/5 text-[10px] font-heading font-black tracking-widest text-[#D4A54A] uppercase">
             <span>Dream</span>
             <span className="text-gray-600">•</span>
             <span>Build</span>
@@ -290,7 +271,7 @@ export default function Footer() {
             <span>Launch</span>
           </div>
 
-          <div className="flex space-x-4 text-[11px] text-gray-500">
+          <div className="flex space-x-4 text-[11px] text-gray-400">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <span>•</span>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
@@ -299,7 +280,10 @@ export default function Footer() {
 
       </div>
 
-      {isIndependenceDay && <TricolorBar className="absolute bottom-0" />}
+      {/* Subtle Repeating Animated Jali Pattern Strip along bottom edge */}
+      <div className="w-full h-10 relative mt-6 overflow-hidden pointer-events-none">
+        <AnimatedJali faint={true} opacityMultiplier={0.7} nodeSpacing={36} className="absolute inset-0" />
+      </div>
     </footer>
   );
 }

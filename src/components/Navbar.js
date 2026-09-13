@@ -6,21 +6,22 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
-import { Menu, X, Globe } from 'lucide-react';
-import { useIndependenceDay } from '@/components/independence-day/IndependenceDayProvider';
-import TricolorBar from '@/components/independence-day/TricolorBar';
+import { useTheme } from '@/context/ThemeContext';
+import { Menu, X, Globe, Sun, Moon } from 'lucide-react';
 
 export default function Navbar() {
   const { language, setLanguage, t } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const isIndependenceDay = useIndependenceDay();
 
   const navLinks = [
     { name: t('nav.home'), href: '/' },
+    { name: 'Vision', href: '/vision' },
     { name: 'Story', href: '/story' },
     { name: 'Work', href: '/work' },
     { name: t('nav.products'), href: '/products' },
+    { name: 'Updates', href: '/updates' },
     { name: t('nav.team'), href: '/team' },
     { name: t('nav.careers'), href: '/careers' },
     { name: t('nav.contact'), href: '/contact' },
@@ -48,9 +49,6 @@ export default function Navbar() {
               height={40} 
               className="object-contain h-8 md:h-10 w-auto transition-transform group-hover:scale-105"
             />
-            {isIndependenceDay && (
-              <span className="text-2xl animate-wave-flag ml-2">🇮🇳</span>
-            )}
           </Link>
 
           {/* Desktop Nav Links */}
@@ -59,15 +57,15 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative py-2 text-xs font-heading font-bold uppercase tracking-wider transition-colors hover:text-white ${
-                  isActive(link.href) ? 'text-accent' : 'text-gray-400'
+                className={`relative py-2 text-xs font-heading font-bold uppercase tracking-wider transition-colors hover:text-[#D4A54A] ${
+                  isActive(link.href) ? 'text-[#D4A54A]' : 'text-gray-400'
                 }`}
               >
                 {link.name}
                 {isActive(link.href) && (
                   <motion.span
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#D4A54A]"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -75,18 +73,28 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Language Toggle & CTA (Desktop) */}
-          <div className="hidden lg:flex items-center space-x-4">
+          {/* Controls: Theme Toggle, Language Toggle & CTA (Desktop) */}
+          <div className="hidden lg:flex items-center space-x-3">
+            {/* Light / Dark Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme mode"
+              className="p-2 rounded-full border border-white/10 bg-white/5 hover:border-[#D4A54A]/40 text-gray-300 hover:text-[#D4A54A] transition-colors cursor-pointer"
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-[#D4A54A]" /> : <Moon className="w-4 h-4 text-[#D4A54A]" />}
+            </button>
+
             {/* Language Selector */}
             <div className="flex items-center space-x-1 bg-white/[0.03] border border-white/10 rounded-full p-1">
-              <Globe className="w-3.5 h-3.5 text-gray-500 ml-2 mr-1" />
+              <Globe className="w-3.5 h-3.5 text-[#D4A54A] ml-2 mr-1" />
               {languages.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => setLanguage(lang.code)}
                   className={`px-2.5 py-1 text-[10px] font-heading font-bold rounded-full transition-all cursor-pointer ${
                     language === lang.code
-                      ? 'bg-[#1F3864] text-white'
+                      ? 'bg-[#D4A54A] text-[#1A1425]'
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -96,23 +104,25 @@ export default function Navbar() {
             </div>
 
             {/* CTA Button */}
-            <div className="flex items-center space-x-3">
-              {isIndependenceDay && (
-                <span className="hidden xl:inline-flex items-center text-[10px] font-bold text-[#FF9933] bg-[#FF9933]/10 px-2 py-1 rounded-full uppercase tracking-widest border border-[#FF9933]/20">
-                  Happy Independence Day 🇮🇳
-                </span>
-              )}
-              <Link
-                href="/careers"
-                className="px-5 py-2.5 rounded-full bg-[var(--theme-accent)] hover:opacity-90 text-white font-heading font-bold text-xs uppercase tracking-wider shadow-lg shadow-accent/20 transition-all hover:scale-105"
-              >
-                {t('nav.join')}
-              </Link>
-            </div>
+            <Link
+              href="/careers"
+              className="px-5 py-2.5 rounded-full bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-wider shadow-lg shadow-[#D4A54A]/20 transition-all hover:scale-105"
+            >
+              {t('nav.join')}
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex lg:hidden items-center space-x-4">
+          <div className="flex lg:hidden items-center space-x-3">
+            {/* Theme Toggle Mobile */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className="p-2 rounded-full border border-white/10 bg-white/5 text-[#D4A54A]"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
             {/* Simple mobile language picker toggle */}
             <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-full px-2 py-1">
               <button
@@ -120,7 +130,7 @@ export default function Navbar() {
                   const nextIndex = (languages.findIndex(l => l.code === language) + 1) % languages.length;
                   setLanguage(languages[nextIndex].code);
                 }}
-                className="text-[10px] font-heading font-bold text-accent uppercase tracking-wider flex items-center space-x-1 cursor-pointer"
+                className="text-[10px] font-heading font-bold text-[#D4A54A] uppercase tracking-wider flex items-center space-x-1 cursor-pointer"
               >
                 <Globe className="w-3 h-3" />
                 <span>{languages.find(l => l.code === language).label}</span>
@@ -145,7 +155,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-[#0D0D0D] border-b border-white/10 overflow-hidden"
+            className="lg:hidden bg-[#1A1425] border-b border-white/10 overflow-hidden"
           >
             <div className="px-4 pt-2 pb-6 space-y-3">
               {navLinks.map((link) => (
@@ -155,7 +165,7 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block py-3 px-4 rounded-lg font-heading text-sm font-bold uppercase tracking-wider transition-colors ${
                     isActive(link.href)
-                      ? 'bg-primary/20 text-accent border-l-4 border-accent'
+                      ? 'bg-[#2B1420] text-[#D4A54A] border-l-4 border-[#D4A54A]'
                       : 'text-gray-400 hover:bg-white/[0.02] hover:text-white'
                   }`}
                 >
@@ -177,7 +187,7 @@ export default function Navbar() {
                         }}
                         className={`px-3 py-1 text-[10px] font-heading font-bold rounded-full transition-all cursor-pointer ${
                           language === lang.code
-                            ? 'bg-[#1F3864] text-white'
+                            ? 'bg-[#D4A54A] text-[#1A1425]'
                             : 'text-gray-400 hover:text-white'
                         }`}
                       >
@@ -191,7 +201,7 @@ export default function Navbar() {
                 <Link
                   href="/careers"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-3.5 rounded-xl bg-[#1D9E75] hover:bg-[#15805d] text-white font-heading font-bold text-xs uppercase tracking-widest shadow-lg transition-colors"
+                  className="w-full text-center py-3.5 rounded-xl bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-widest shadow-lg transition-colors"
                 >
                   {t('nav.join')}
                 </Link>
@@ -200,7 +210,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-      {isIndependenceDay && <TricolorBar className="absolute bottom-0" />}
     </nav>
   );
 }

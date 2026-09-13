@@ -24,9 +24,10 @@ export default function HeroParticles() {
       constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
         this.radius = Math.random() * 1.5 + 0.5;
+        this.color = Math.random() > 0.3 ? 'rgba(212, 165, 74, 0.4)' : 'rgba(253, 251, 247, 0.3)'; // Gold / Warm cream
       }
       
       update() {
@@ -40,12 +41,12 @@ export default function HeroParticles() {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(29, 158, 117, 0.4)'; // Teal
+        ctx.fillStyle = this.color;
         ctx.fill();
       }
     }
     
-    const particleCount = window.innerWidth < 768 ? 40 : 80;
+    const particleCount = window.innerWidth < 768 ? 35 : 70;
     
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
@@ -63,9 +64,9 @@ export default function HeroParticles() {
           const dy = particles[i].y - particles[j].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
           
-          if (distance < 120) {
+          if (distance < 110) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(68, 136, 204, ${0.15 * (1 - distance / 120)})`; // Navy/Blue lines
+            ctx.strokeStyle = `rgba(212, 165, 74, ${0.12 * (1 - distance / 110)})`; // Warm gold interconnects
             ctx.lineWidth = 0.5;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);

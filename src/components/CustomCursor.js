@@ -26,7 +26,8 @@ export default function CustomCursor() {
       const target = e.target;
       if (target.closest('a') || target.closest('button')) {
         const classNames = target.className || '';
-        if (typeof classNames === 'string' && (classNames.includes('bg-white') || classNames.includes('bg-[#1D9E75]') || classNames.includes('accent'))) {
+        if (typeof classNames === 'string' && (classNames.includes('bg-[#D4A54A]') || classNames.includes('bg-white') || classNames.includes('accent'))) {
+          // Terracotta hover on key CTAs
           setCursorVariant('cta');
         } else {
           setCursorVariant('link');
@@ -49,24 +50,24 @@ export default function CustomCursor() {
 
   const variants = {
     default: {
-      x: mousePosition.x - 10,
-      y: mousePosition.y - 10,
-      backgroundColor: 'rgba(255, 255, 255, 1)',
-      boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.3)',
+      x: mousePosition.x - 6,
+      y: mousePosition.y - 6,
+      backgroundColor: '#D4A54A', // Gold dot
+      boxShadow: '0 0 14px 3px rgba(212, 165, 74, 0.45)',
       scale: 1
     },
     link: {
-      x: mousePosition.x - 15,
-      y: mousePosition.y - 15,
-      backgroundColor: 'rgba(29, 158, 117, 1)',
-      boxShadow: '0 0 20px 8px rgba(29, 158, 117, 0.4)',
-      scale: 1.5
+      x: mousePosition.x - 12,
+      y: mousePosition.y - 12,
+      backgroundColor: 'rgba(212, 165, 74, 0.85)',
+      boxShadow: '0 0 20px 6px rgba(212, 165, 74, 0.5)',
+      scale: 1.4
     },
     cta: {
-      x: mousePosition.x - 15,
-      y: mousePosition.y - 15,
-      backgroundColor: 'rgba(220, 38, 38, 1)',
-      boxShadow: '0 0 20px 8px rgba(220, 38, 38, 0.4)',
+      x: mousePosition.x - 12,
+      y: mousePosition.y - 12,
+      backgroundColor: '#C1440E', // Terracotta on CTA hover
+      boxShadow: '0 0 22px 7px rgba(193, 68, 14, 0.55)',
       scale: 1.5
     }
   };
@@ -84,14 +85,14 @@ export default function CustomCursor() {
         }
       `}</style>
       <motion.div
-        className="fixed top-0 left-0 w-5 h-5 rounded-full pointer-events-none z-[100]"
+        className="fixed top-0 left-0 w-3 h-3 rounded-full pointer-events-none z-[100]"
         variants={variants}
         animate={cursorVariant}
         transition={{
           type: 'spring',
-          stiffness: 500,
-          damping: 28,
-          mass: 0.5
+          stiffness: 550,
+          damping: 30,
+          mass: 0.4
         }}
       />
     </>

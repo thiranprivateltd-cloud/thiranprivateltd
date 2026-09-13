@@ -1,5 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
+import { PencilJourneyIcon } from '@/components/HeritageMotifs';
+import GlassCard from '@/components/GlassCard';
 
 export default function CompanyTimeline() {
   const milestones = [
@@ -32,7 +34,7 @@ export default function CompanyTimeline() {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, x: -50 },
+    hidden: { opacity: 0, x: -40 },
     visible: { 
       opacity: 1, 
       x: 0, 
@@ -41,8 +43,8 @@ export default function CompanyTimeline() {
   };
 
   return (
-    <section className="py-24 relative overflow-hidden bg-[#0A0A0A]">
-      <div className="max-w-4xl mx-auto px-6">
+    <section className="py-24 relative overflow-hidden bg-[#1A1425]/40">
+      <div className="max-w-4xl mx-auto px-6 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -50,57 +52,45 @@ export default function CompanyTimeline() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-[#D4A54A]/30 bg-[#D4A54A]/10 text-[10px] font-heading font-bold uppercase tracking-widest text-[#D4A54A] mb-3">
+            <PencilJourneyIcon className="w-3.5 h-3.5" color="#D4A54A" />
+            <span>Execution Milestones</span>
+          </div>
           <h2 className="text-3xl md:text-5xl font-black font-heading text-white tracking-tight mb-4">
             The Journey So Far
           </h2>
-          <p className="text-gray-400 max-w-xl mx-auto">
-            From our founding to launching our first product, here is a timeline of our rapid execution and growth.
+          <p className="text-[#B8A9A0] max-w-xl mx-auto text-sm sm:text-base">
+            From our founding in Chennai to building scalable education tools, here is our execution pathway.
           </p>
         </motion.div>
 
-        <div className="relative">
-          {/* Vertical Line */}
-          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-white/10 -translate-x-1/2">
+        <div className="relative border-l-2 border-[#D4A54A]/25 ml-4 md:ml-32 space-y-12 pb-8">
+          {milestones.map((item, index) => (
             <motion.div 
-              className="w-full bg-gradient-to-b from-teal-500 to-blue-500 origin-top"
-              variants={lineVariants}
+              key={index}
+              variants={itemVariants}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-            />
-          </div>
+              viewport={{ once: true, margin: "-50px" }}
+              className="relative pl-8 md:pl-12 group"
+            >
+              {/* Timeline Gold Node */}
+              <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-[#1A1425] border-2 border-[#D4A54A] group-hover:scale-125 transition-transform" />
+              
+              {/* Date tag for desktop */}
+              <div className="md:absolute md:-left-32 md:top-1 text-xs font-mono font-bold uppercase tracking-wider text-[#D4A54A] mb-2 md:mb-0">
+                {item.date}
+              </div>
 
-          <div className="space-y-12">
-            {milestones.map((milestone, index) => (
-              <motion.div 
-                key={index}
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-100px" }}
-                className={`relative flex items-center justify-between md:justify-normal ${
-                  index % 2 === 0 ? "md:flex-row-reverse" : ""
-                }`}
-              >
-                {/* Timeline Node */}
-                <div className="absolute left-4 md:left-1/2 w-8 h-8 rounded-full bg-[#0A0A0A] border-2 border-teal-500 -translate-x-1/2 flex items-center justify-center shadow-[0_0_15px_rgba(29,158,117,0.5)] z-10">
-                  <div className="w-2 h-2 rounded-full bg-white animate-ping" />
+              <GlassCard variant="default" className="p-6">
+                <div className="flex items-center space-x-3 mb-2">
+                  <span className="text-2xl">{item.icon}</span>
+                  <h3 className="text-xl font-bold font-heading text-white">{item.title}</h3>
                 </div>
-
-                {/* Content Card */}
-                <div className={`ml-12 md:ml-0 w-full md:w-5/12 glass-panel p-6 ${
-                  index % 2 === 0 ? "md:mr-auto" : "md:ml-auto"
-                }`}>
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-2xl">{milestone.icon}</span>
-                    <span className="text-teal-400 font-bold text-sm uppercase tracking-widest">{milestone.date}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">{milestone.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{milestone.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                <p className="text-[#B8A9A0] text-sm leading-relaxed">{item.description}</p>
+              </GlassCard>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

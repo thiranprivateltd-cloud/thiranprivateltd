@@ -14,7 +14,7 @@ export default function ParticleBackground() {
 
     let animationFrameId;
     let particles = [];
-    const maxParticles = 60;
+    const maxParticles = 50;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -28,17 +28,16 @@ export default function ParticleBackground() {
       constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.vx = (Math.random() - 0.5) * 0.3; // Speed X
-        this.vy = (Math.random() - 0.5) * 0.3; // Speed Y
-        this.radius = Math.random() * 2 + 0.5; // Size
-        this.color = Math.random() > 0.5 ? 'rgba(68, 136, 204, 0.25)' : 'rgba(29, 158, 117, 0.2)'; // Blue or Teal
+        this.vx = (Math.random() - 0.5) * 0.25;
+        this.vy = (Math.random() - 0.5) * 0.25;
+        this.radius = Math.random() * 1.8 + 0.4;
+        this.color = Math.random() > 0.4 ? 'rgba(212, 165, 74, 0.2)' : 'rgba(193, 68, 14, 0.15)'; // Gold or terracotta
       }
 
       update() {
         this.x += this.vx;
         this.y += this.vy;
 
-        // Wrap around boundaries
         if (this.x < 0) this.x = canvas.width;
         if (this.x > canvas.width) this.x = 0;
         if (this.y < 0) this.y = canvas.height;
@@ -53,7 +52,6 @@ export default function ParticleBackground() {
       }
     }
 
-    // Initialize particles
     for (let i = 0; i < maxParticles; i++) {
       particles.push(new Particle());
     }
@@ -61,7 +59,7 @@ export default function ParticleBackground() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Draw a subtle dark gradient vignette
+      // Draw subtle indigo-maroon radial vignette
       const gradient = ctx.createRadialGradient(
         canvas.width / 2,
         canvas.height / 2,
@@ -70,8 +68,8 @@ export default function ParticleBackground() {
         canvas.height / 2,
         Math.max(canvas.width, canvas.height)
       );
-      gradient.addColorStop(0, 'rgba(10, 10, 10, 0)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+      gradient.addColorStop(0, 'rgba(26, 20, 37, 0)');
+      gradient.addColorStop(1, 'rgba(26, 20, 37, 0.7)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -80,18 +78,17 @@ export default function ParticleBackground() {
         particle.draw();
       });
 
-      // Draw subtle connections between close particles
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 150) {
+          if (dist < 130) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(68, 136, 204, ${0.1 * (1 - dist / 150)})`;
+            ctx.strokeStyle = `rgba(212, 165, 74, ${0.08 * (1 - dist / 130)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
