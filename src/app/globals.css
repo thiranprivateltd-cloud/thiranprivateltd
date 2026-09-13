@@ -1,93 +1,119 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0A0A;
-  --foreground: #FFFFFF;
-  --theme-primary: #1F3864;
-  --theme-accent: #1D9E75;
-  --theme-highlight: #4488CC;
-  --theme-dark-card: #111b2d;
+  --background: #1A1425;
+  --background-secondary: #2B1420;
+  --foreground: #FDFBF7;
+  --text-secondary: #B8A9A0;
+  --theme-primary: #1A1425;
+  --theme-maroon: #2B1420;
+  --theme-accent: #D4A54A;
+  --theme-accent-secondary: #C1440E;
+  --theme-success: #7A9B76;
+  --theme-dark-card: #2B1420;
+  
+  --card-bg: rgba(43, 20, 32, 0.4);
+  --card-border: rgba(212, 165, 74, 0.25);
+  --nav-bg: rgba(26, 20, 37, 0.85);
+  --panel-bg: rgba(43, 20, 32, 0.55);
 }
 
-body.theme-independence {
-  --theme-primary: #FF9933;
-  --theme-accent: #138808;
-  --theme-highlight: #FFD700;
+html.light-mode {
+  --background: #FAF6F0;
+  --background-secondary: #F3ECE2;
+  --foreground: #1A1425;
+  --text-secondary: #6B5D54;
+  --theme-primary: #FAF6F0;
+  --theme-maroon: #EDE2D4;
+  --theme-accent: #D4A54A;
+  --theme-accent-secondary: #C1440E;
+  --theme-success: #5F825B;
+  --theme-dark-card: #FFFFFF;
+  
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(212, 165, 74, 0.35);
+  --nav-bg: rgba(250, 246, 240, 0.88);
+  --panel-bg: rgba(255, 255, 255, 0.9);
 }
 
 @theme {
-  --color-primary: var(--theme-primary);
-  --color-accent: var(--theme-accent);
-  --color-highlight: var(--theme-highlight);
-  --color-dark-bg: #0A0A0A;
-  --color-dark-card: var(--theme-dark-card);
-  --font-heading: 'Arial Black', Arial, sans-serif;
-  --font-body: Arial, sans-serif;
+  --color-primary: #1A1425;
+  --color-maroon: #2B1420;
+  --color-accent: #D4A54A;
+  --color-accent-secondary: #C1440E;
+  --color-success: #7A9B76;
+  --color-dark-bg: var(--background);
+  --color-dark-card: var(--card-bg);
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--text-secondary);
+  --font-heading: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif-accent: 'Cinzel', 'Playfair Display', Georgia, serif;
 }
 
 body {
-  background-color: #0A0A0A;
-  color: #FFFFFF;
-  font-family: Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism utility with Indian Heritage Tokens */
 .glass-nav {
-  background: rgba(10, 10, 10, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--card-border);
 }
 
 .glass-panel {
-  background: rgba(15, 25, 45, 0.4);
+  background: var(--panel-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--card-border);
   border-radius: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
 }
 
 .glass-panel:hover {
-  border-color: rgba(29, 158, 117, 0.5); /* Teal accent */
-  box-shadow: 0 8px 32px 0 rgba(29, 158, 117, 0.15);
+  border-color: rgba(212, 165, 74, 0.5); /* Gold accent */
+  box-shadow: 0 8px 32px 0 rgba(212, 165, 74, 0.15);
 }
 
 .glass-panel.accent-red:hover {
-  border-color: rgba(220, 38, 38, 0.5); 
-  box-shadow: 0 8px 32px 0 rgba(220, 38, 38, 0.15);
+  border-color: rgba(193, 68, 14, 0.6); 
+  box-shadow: 0 8px 32px 0 rgba(193, 68, 14, 0.2);
 }
 
-/* Legacy glass-card keeping it for compatibility during transition */
+/* Updated Glass Card with Indian Heritage Tokens */
 .glass-card {
-  background: rgba(31, 56, 100, 0.05);
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.2s ease-out;
+  border: 1px solid var(--card-border);
+  transition: all 0.25s ease-out;
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(31, 56, 100, 0.08);
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+  border-color: rgba(212, 165, 74, 0.45);
+  box-shadow: 0 6px 24px -4px rgba(212, 165, 74, 0.15);
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar with Indian Gold Palette */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0A0A0A;
+  background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1F3864;
+  background: rgba(212, 165, 74, 0.3);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #1D9E75;
+  background: #D4A54A;
 }
 
 /* Hide scrollbar but keep scroll functionality */
@@ -99,57 +125,22 @@ body {
   scrollbar-width: none;
 }
 
-/* Subtle text highlight effect instead of heavy glow */
-.text-glow-blue {
-  text-shadow: 0 0 10px rgba(68, 136, 204, 0.2);
+/* Subtle gold and terracotta text highlight effects */
+.text-glow-gold {
+  text-shadow: 0 0 16px rgba(212, 165, 74, 0.35);
 }
 
-.text-glow-teal {
-  text-shadow: 0 0 10px rgba(29, 158, 117, 0.2);
+.text-glow-terracotta {
+  text-shadow: 0 0 16px rgba(193, 68, 14, 0.35);
 }
 
-/* Dot grid background */
-.dot-bg {
-  background-image: radial-gradient(rgba(68, 136, 204, 0.1) 1px, transparent 1px);
+/* Kolam dots background pattern */
+.kolam-dot-bg {
+  background-image: radial-gradient(rgba(212, 165, 74, 0.12) 1.2px, transparent 1.2px);
   background-size: 24px 24px;
 }
 
-.theme-independence .dot-bg {
-  background-image: radial-gradient(rgba(255, 153, 51, 0.1) 1px, transparent 1px);
-}
-
-/* INDEPENDENCE DAY ANIMATIONS */
-@keyframes wave-flag {
-  0% { transform: skewY(-5deg) scaleY(1); }
-  50% { transform: skewY(5deg) scaleY(1.05); }
-  100% { transform: skewY(-5deg) scaleY(1); }
-}
-
-.animate-wave-flag {
-  animation: wave-flag 2s ease-in-out infinite;
-  transform-origin: left center;
-}
-
-@keyframes spin-slow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
-}
-
-@keyframes float-up {
-  0% { transform: translateY(100vh) rotate(0deg) scale(0.8); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
-}
-
-.animate-float-up {
-  animation: float-up 15s linear infinite;
-}
-
-.text-glow-saffron {
-  text-shadow: 0 0 15px rgba(255, 153, 51, 0.4);
+.dot-bg {
+  background-image: radial-gradient(rgba(212, 165, 74, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
