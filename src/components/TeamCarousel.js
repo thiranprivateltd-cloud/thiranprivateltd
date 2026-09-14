@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const teamMembers = [
   { name: "G S Varshith", role: "Founder & CEO", quote: "Building the future of education.", funFact: "2nd Year College Student", image: "/founder.jpg" },
-  { name: "Dharshan S", role: "Co-Founder & COO", quote: "Execution is the game.", funFact: "D Spark Web Solutions Partner" },
+  { name: "Dharshan S", role: "Co-Founder & COO", quote: "Execution is the game.", funFact: "D Spark Web Solutions Partner", image:"/coo.jpg" },
   { name: "Brundavanam P", role: "Project manager", quote: "Ecosystem Operations & Delivery", funFact: "Master organizer." },
   { name: "Sasi", role: "Legal Mentor", quote: "Keeping us compliant.", funFact: "Reads contracts for fun." },
   { name: "Mukunthan S", role: "Tech Lead, UI/UX Designer", quote: "Design is how it works.", funFact: "Loves clean UI.", image:"/muku.jpg" },
