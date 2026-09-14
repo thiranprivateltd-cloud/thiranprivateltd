@@ -9,7 +9,7 @@ const teamMembers = [
   { name: "Dharshan S", role: "Co-Founder & COO", quote: "Execution is the game.", funFact: "D Spark Web Solutions Partner" },
   { name: "Brundavanam P", role: "Project manager", quote: "Ecosystem Operations & Delivery", funFact: "Master organizer." },
   { name: "Sasi", role: "Legal Mentor", quote: "Keeping us compliant.", funFact: "Reads contracts for fun." },
-  { name: "Mukunthan S", role: "Tech Lead, UI/UX Designer", quote: "Design is how it works.", funFact: "Loves clean UI." },
+  { name: "Mukunthan S", role: "Tech Lead, UI/UX Designer", quote: "Design is how it works.", funFact: "Loves clean UI.", image:"/muku.jpg" },
   { name: "Samuel Ignitius", role: "Full Stack Developer", quote: "Code is poetry.", funFact: "React enthusiast." },
   { name: "Shaik Nabeela Rayees", role: "Backend Developer", quote: "Data is beautiful.", funFact: "Loves APIs." },
   { name: "Keerthana P S", role: "Ai/ML Developer", quote: "Machines can learn too.", funFact: "Python expert." },
