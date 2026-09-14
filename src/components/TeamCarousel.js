@@ -13,7 +13,7 @@ const teamMembers = [
   { name: "Samuel Ignitius", role: "Full Stack Developer", quote: "Code is poetry.", funFact: "React enthusiast." },
   { name: "Shaik Nabeela Rayees", role: "Backend Developer", quote: "Data is beautiful.", funFact: "Loves APIs." },
   { name: "Keerthana P S", role: "Ai/ML Developer", quote: "Machines can learn too.", funFact: "Python expert." },
-  { name: "Hari Haran V", role: "Career Research Analyst", quote: "Finding patterns in chaos.", funFact: "Avid reader." },
+  { name: "Hari Haran V", role: "Career Research Analyst", quote: "Finding patterns in chaos.", funFact: "Avid reader.", image:"/hariharan.jpg" },
   { name: "Mogesh J", role: "Data Analyst", quote: "Numbers don't lie.", funFact: "SQL wizard." },
   { name: "Prakathesh C", role: "Tech Support Lead & Frontend Developer", quote: "Helping one at a time.", funFact: "Always smiling.", image:"/prakathesh.jpg" },
   { name: "Hariprasad H", role: "Integrated Testing Coordinator", quote: "Ensuring quality always.", funFact: "Bug hunter." },
