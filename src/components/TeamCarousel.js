@@ -23,7 +23,7 @@ const teamMembers = [
   { name: "Akash M", role: "Growth Manager, Digital Media", quote: "Telling our story.", funFact: "Growth hacker." },
   { name: "Kanmani G", role: "Growth Support, Data Coordinator", quote: "Data drives growth.", funFact: "Master organizer." },
   { name: "Lohidharani G S", role: "HR Admin, Community Manager", quote: "People are our strength.", funFact: "Community builder." },
-  { name: "Vaishali S", role: "Operations Monitoring", quote: "Keeping the lights on.", funFact: "System optimizer." }
+  { name: "Vaishali S", role: "Operations Monitoring", quote: "Keeping the lights on.", funFact: "System optimizer." },
   { name: "Praveena R", role: "HR Coordinator , Sales Executive", quote: "Keep People Engaged.", funFact: "Master of Sales." }
 ];
 
