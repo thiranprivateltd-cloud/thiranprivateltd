@@ -15,7 +15,7 @@ const teamMembers = [
   { name: "Keerthana P S", role: "Ai/ML Developer", quote: "Machines can learn too.", funFact: "Python expert." },
   { name: "Hari Haran V", role: "Career Research Analyst", quote: "Finding patterns in chaos.", funFact: "Avid reader." },
   { name: "Mogesh J", role: "Data Analyst", quote: "Numbers don't lie.", funFact: "SQL wizard." },
-  { name: "Prakathesh C", role: "Tech Support Lead & Frontend Developer", quote: "Helping one at a time.", funFact: "Always smiling." },
+  { name: "Prakathesh C", role: "Tech Support Lead & Frontend Developer", quote: "Helping one at a time.", funFact: "Always smiling.", image:"/prakathesh.jpg" },
   { name: "Hariprasad H", role: "Integrated Testing Coordinator", quote: "Ensuring quality always.", funFact: "Bug hunter." },
   { name: "Navasri N", role: "Content & Communication Manager", quote: "Words matter.", funFact: "Social media guru." },
   { name: "Rahav V K", role: "Product Manager", quote: "Users first, always.", funFact: "Travels every weekend." },
