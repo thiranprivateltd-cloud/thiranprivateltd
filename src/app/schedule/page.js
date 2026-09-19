@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar as CalendarIcon, 
@@ -149,14 +149,14 @@ const allPeople = [
   }
 ];
 
-// Preset Slots Generator
+// Preset Slots Generator (Monday - Saturday strictly After 4:00 PM)
 const presetSlots = [
-  '10:00 AM - 10:30 AM',
-  '11:30 AM - 12:00 PM',
-  '02:00 PM - 02:30 PM',
-  '03:30 PM - 04:00 PM',
-  '05:00 PM - 05:30 PM',
-  '06:30 PM - 07:00 PM'
+  '04:00 PM - 04:30 PM',
+  '04:30 PM - 05:00 PM',
+  '05:30 PM - 06:00 PM',
+  '06:30 PM - 07:00 PM',
+  '07:30 PM - 08:00 PM',
+  '08:30 PM - 09:00 PM'
 ];
 
 export default function SchedulePage() {
@@ -169,9 +169,11 @@ export default function SchedulePage() {
   const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(tomorrowStr);
   const [slotType, setSlotType] = useState('preset'); // 'preset' | 'custom'
-  const [selectedSlot, setSelectedSlot] = useState(presetSlots[2]);
-  const [customStartTime, setCustomStartTime] = useState('15:00');
+  const [selectedSlot, setSelectedSlot] = useState(presetSlots[0]);
+  const [customStartTime, setCustomStartTime] = useState('16:30');
   const [customDuration, setCustomDuration] = useState('30');
+  const [bookedSlotsList, setBookedSlotsList] = useState([]);
+  const [bookingError, setBookingError] = useState('');
   
   // Step 4: Form details
   const [formData, setFormData] = useState({
@@ -186,6 +188,20 @@ export default function SchedulePage() {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [confirmedData, setConfirmedData] = useState(null);
 
+  // Fetch already booked slots when selectedPerson or selectedDate changes
+  useEffect(() => {
+    if (selectedPerson && selectedDate) {
+      fetch(`/api/schedule?personEmail=${encodeURIComponent(selectedPerson.email)}&date=${selectedDate}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.bookedSlots) {
+            setBookedSlotsList(data.bookedSlots);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [selectedPerson, selectedDate]);
+
   // Filter available people based on purpose
   const currentPurposeObj = purposes.find((p) => p.id === selectedPurpose);
   const availablePeople = allPeople.filter((person) => 
@@ -196,11 +212,13 @@ export default function SchedulePage() {
     setSelectedPurpose(purposeId);
     setSelectedPerson(null);
     setBookingConfirmed(false);
+    setBookingError('');
   };
 
   const handlePersonSelect = (person) => {
     setSelectedPerson(person);
     setBookingConfirmed(false);
+    setBookingError('');
   };
 
   // Get active time string
@@ -212,6 +230,7 @@ export default function SchedulePage() {
     e.preventDefault();
     if (!selectedPerson) return;
 
+    setBookingError('');
     setIsSubmitting(true);
     try {
       const payload = {
@@ -219,6 +238,7 @@ export default function SchedulePage() {
         email: formData.email,
         organization: formData.organization,
         purpose: currentPurposeObj?.title,
+        personId: selectedPerson.id,
         personName: selectedPerson.name,
         personEmail: selectedPerson.email,
         date: selectedDate,
@@ -235,26 +255,16 @@ export default function SchedulePage() {
 
       const data = await res.json();
 
-      // Persist to local bookings for instant Admin Portal viewing
-      const existingBookings = JSON.parse(localStorage.getItem('thiran_meeting_requests') || '[]');
-      const newBooking = {
-        id: `REQ-${Date.now()}`,
-        name: formData.name,
-        email: formData.email,
-        organization: formData.organization || '-',
-        purpose: currentPurposeObj?.title || 'General',
-        personName: selectedPerson.name,
-        personEmail: selectedPerson.email,
-        date: selectedDate,
-        timeSlot: activeTimeSlot,
-        message: formData.message,
-        status: 'Confirmed & Synced'
-      };
-      localStorage.setItem('thiran_meeting_requests', JSON.stringify([newBooking, ...existingBookings]));
+      if (!res.ok) {
+        setBookingError(data.error || 'Failed to book slot. It might be already taken.');
+        setIsSubmitting(false);
+        return;
+      }
 
       setConfirmedData({
         ...payload,
-        icsData: data.icsData
+        icsData: data.icsData,
+        graphCalendar: data.graphCalendar
       });
       setBookingConfirmed(true);
 
@@ -267,7 +277,7 @@ export default function SchedulePage() {
 
     } catch (err) {
       console.error('Error submitting booking:', err);
-      setBookingConfirmed(true);
+      setBookingError('An error occurred. Please try a different slot.');
     } finally {
       setIsSubmitting(false);
     }
@@ -598,19 +608,28 @@ export default function SchedulePage() {
                           <div className="grid grid-cols-2 gap-2.5">
                             {presetSlots.map((slot) => {
                               const isSlotSelected = selectedSlot === slot;
+                              const isBooked = bookedSlotsList.includes(slot);
+
                               return (
                                 <button
                                   key={slot}
                                   type="button"
+                                  disabled={isBooked}
                                   onClick={() => setSelectedSlot(slot)}
                                   className={`p-3 rounded-xl border text-xs font-medium transition-all text-left flex items-center justify-between cursor-pointer ${
-                                    isSlotSelected
+                                    isBooked 
+                                      ? 'bg-white/[0.01] border-red-500/20 text-gray-500 opacity-50 cursor-not-allowed line-through'
+                                      : isSlotSelected
                                       ? 'bg-[#2B1420] border-[#D4A54A] text-white shadow-md shadow-[#D4A54A]/20'
                                       : 'bg-white/[0.02] border-white/10 text-gray-300 hover:border-[#D4A54A]/40'
                                   }`}
                                 >
                                   <span>{slot}</span>
-                                  {isSlotSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A54A]" />}
+                                  {isBooked ? (
+                                    <span className="text-[9px] text-red-400 uppercase font-bold tracking-wider">Booked</span>
+                                  ) : isSlotSelected ? (
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A54A]" />
+                                  ) : null}
                                 </button>
                               );
                             })}
@@ -618,7 +637,7 @@ export default function SchedulePage() {
                         ) : (
                           <div className="space-y-3 p-4 bg-white/[0.02] border border-white/10 rounded-xl">
                             <p className="text-xs text-[#D4A54A] font-medium">
-                              Specify your convenient start time and duration:
+                              Specify your convenient start time and duration (after 4:00 PM):
                             </p>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
@@ -668,6 +687,11 @@ export default function SchedulePage() {
 
                     <GlassCard className="p-6 border-[#D4A54A]/30">
                       <form onSubmit={handleSubmitBooking} className="space-y-4">
+                        {bookingError && (
+                          <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs font-medium">
+                            ⚠️ {bookingError}
+                          </div>
+                        )}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs font-heading uppercase tracking-wider text-gray-300 mb-1.5">
