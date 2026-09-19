@@ -14,7 +14,7 @@ export default function FloatingSocials() {
           <div className="flex flex-col space-y-3 items-end">
             {/* Instagram Button */}
             <motion.a
-              href="https://www.instagram.com/thiranprivateltd?stkn=Y28wd252azMzZDc1"
+              href="https://www.instagram.com/thiran_groups?igsh=Y28wd252azMzZDc1"
               target="_blank"
               rel="noopener noreferrer"
               initial={{ opacity: 0, y: 15, scale: 0.8 }}

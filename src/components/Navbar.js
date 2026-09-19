@@ -23,6 +23,7 @@ export default function Navbar() {
     { name: t('nav.products'), href: '/products' },
     { name: 'Updates', href: '/updates' },
     { name: t('nav.team'), href: '/team' },
+    { name: 'Life', href: '/life-at-thiran' },
     { name: t('nav.careers'), href: '/careers' },
     { name: t('nav.contact'), href: '/contact' },
   ];

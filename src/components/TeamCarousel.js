@@ -6,16 +6,16 @@ import Image from 'next/image';
 
 const teamMembers = [
   { name: "G S Varshith", role: "Founder & CEO", quote: "Building the future of education.", funFact: "2nd Year College Student", image: "/founder.jpg" },
-  { name: "Dharshan S", role: "Co-Founder & COO", quote: "Execution is the game.", funFact: "D Spark Web Solutions Partner", image:"/coo.jpg" },
+  { name: "Dharshan S", role: "Co-Founder & COO", quote: "Execution is the game.", funFact: "D Spark Web Solutions Partner" },
   { name: "Brundavanam P", role: "Project manager", quote: "Ecosystem Operations & Delivery", funFact: "Master organizer." },
   { name: "Sasi", role: "Legal Mentor", quote: "Keeping us compliant.", funFact: "Reads contracts for fun." },
-  { name: "Mukunthan S", role: "Tech Lead, Event Coordinator", quote: "Design is how it works.", funFact: "Loves clean UI.", image:"/muku.jpg" },
+  { name: "Mukunthan S", role: "Tech Lead, UI/UX Designer", quote: "Design is how it works.", funFact: "Loves clean UI." },
   { name: "Samuel Ignitius", role: "Full Stack Developer", quote: "Code is poetry.", funFact: "React enthusiast." },
   { name: "Shaik Nabeela Rayees", role: "Backend Developer", quote: "Data is beautiful.", funFact: "Loves APIs." },
   { name: "Keerthana P S", role: "Ai/ML Developer", quote: "Machines can learn too.", funFact: "Python expert." },
-  { name: "Hari Haran V", role: "Career Research Analyst", quote: "Finding patterns in chaos.", funFact: "Avid reader.", image:"/hariharan.jpg" },
+  { name: "Hari Haran V", role: "Career Research Analyst", quote: "Finding patterns in chaos.", funFact: "Avid reader." },
   { name: "Mogesh J", role: "Data Analyst", quote: "Numbers don't lie.", funFact: "SQL wizard." },
-  { name: "Prakathesh C", role: "Tech Support Lead & Frontend Developer", quote: "Helping one at a time.", funFact: "Always smiling.", image:"/prakathesh.jpg" },
+  { name: "Prakathesh C", role: "Tech Support Lead & Frontend Developer", quote: "Helping one at a time.", funFact: "Always smiling." },
   { name: "Hariprasad H", role: "Integrated Testing Coordinator", quote: "Ensuring quality always.", funFact: "Bug hunter." },
   { name: "Navasri N", role: "Content & Communication Manager", quote: "Words matter.", funFact: "Social media guru." },
   { name: "Rahav V K", role: "Product Manager", quote: "Users first, always.", funFact: "Travels every weekend." },
@@ -23,8 +23,7 @@ const teamMembers = [
   { name: "Akash M", role: "Growth Manager, Digital Media", quote: "Telling our story.", funFact: "Growth hacker." },
   { name: "Kanmani G", role: "Growth Support, Data Coordinator", quote: "Data drives growth.", funFact: "Master organizer." },
   { name: "Lohidharani G S", role: "HR Admin, Community Manager", quote: "People are our strength.", funFact: "Community builder." },
-  { name: "Vaishali S", role: "Operations Monitoring", quote: "Keeping the lights on.", funFact: "System optimizer." },
-  { name: "Praveena R", role: "HR Coordinator , Sales Executive", quote: "Keep People Engaged.", funFact: "Master of Sales." }
+  { name: "Vaishali S", role: "Operations Monitoring", quote: "Keeping the lights on.", funFact: "System optimizer." }
 ];
 
 export default function TeamCarousel() {

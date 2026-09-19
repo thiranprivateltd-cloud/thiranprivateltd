@@ -31,12 +31,14 @@ export default function Footer() {
     { name: t('nav.home'), href: '/' },
     { name: 'Vision & Mission', href: '/vision' },
     { name: 'Story', href: '/story' },
+    { name: 'Life at Thiran', href: '/life-at-thiran' },
     { name: 'Proof of Execution', href: '/work' },
     { name: 'Updates & Build Log', href: '/updates' },
     { name: t('nav.team'), href: '/team' },
     { name: 'Investors', href: '/investors' },
     { name: t('nav.careers'), href: '/careers' },
     { name: 'Press & Media', href: '/press' },
+    { name: 'Schedule a Meeting', href: '/schedule' },
     { name: t('nav.contact'), href: '/contact' },
   ];
 
