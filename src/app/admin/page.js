@@ -45,7 +45,6 @@ export default function AdminPortal() {
   const [waitlist, setWaitlist] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
   const [notices, setNotices] = useState([]);
-  const [meetingRequests, setMeetingRequests] = useState([]);
 
   // Member Form State
   const [memberName, setMemberName] = useState('');
@@ -110,9 +109,6 @@ export default function AdminPortal() {
 
       const savedNotices = localStorage.getItem('thiran_notices');
       if (savedNotices) setNotices(JSON.parse(savedNotices));
-
-      const savedBookings = localStorage.getItem('thiran_meeting_requests');
-      if (savedBookings) setMeetingRequests(JSON.parse(savedBookings));
     } catch (err) {
       console.error("Failed to load local storage data", err);
     }
@@ -128,9 +124,8 @@ export default function AdminPortal() {
       localStorage.setItem('thiran_waitlist', JSON.stringify(waitlist));
       localStorage.setItem('thiran_subscribers', JSON.stringify(subscribers));
       localStorage.setItem('thiran_notices', JSON.stringify(notices));
-      localStorage.setItem('thiran_meeting_requests', JSON.stringify(meetingRequests));
     }
-  }, [members, activities, meetings, applications, waitlist, subscribers, notices, meetingRequests, isAuthenticated]);
+  }, [members, activities, meetings, applications, waitlist, subscribers, notices, isAuthenticated]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -608,16 +603,6 @@ export default function AdminPortal() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('bookings')}
-                  className={`px-5 py-3 rounded-xl font-heading text-xs font-bold uppercase tracking-wider flex items-center space-x-2 transition-all cursor-pointer whitespace-nowrap ${
-                    activeTab === 'bookings' ? 'bg-[#D4A54A] text-black shadow-lg shadow-[#D4A54A]/20' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>Meeting Requests ({meetingRequests.length})</span>
-                </button>
-
-                <button
                   onClick={() => setActiveTab('waitlist')}
                   className={`px-5 py-3 rounded-xl font-heading text-xs font-bold uppercase tracking-wider flex items-center space-x-2 transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === 'waitlist' ? 'bg-teal-500 text-black shadow-lg shadow-teal-500/20' : 'text-gray-400 hover:text-white'
@@ -1031,74 +1016,6 @@ export default function AdminPortal() {
                         </div>
                       )}
                     </div>
-                  </motion.div>
-                )}
-
-                {/* 5. MEETING REQUESTS TAB */}
-                {activeTab === 'bookings' && (
-                  <motion.div key="tab-bookings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-                    <div className="flex justify-between items-center glass-panel p-6 rounded-3xl border border-[#D4A54A]/30">
-                      <div>
-                        <h3 className="font-heading font-black text-lg uppercase text-white">
-                          Inbound Meeting & Schedule Requests
-                        </h3>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Requests submitted from the /schedule page across Investors, Partners, Press & Guidance
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <span className="text-xs font-mono text-[#D4A54A] bg-[#D4A54A]/10 px-3 py-1 rounded-full border border-[#D4A54A]/30 font-bold">
-                          {meetingRequests.length} Total Requests
-                        </span>
-                      </div>
-                    </div>
-
-                    {meetingRequests.length === 0 ? (
-                      <div className="glass-panel p-12 rounded-3xl text-center border border-white/10">
-                        <Calendar className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                        <h4 className="font-heading font-bold text-white text-base">No Meeting Requests Yet</h4>
-                        <p className="text-xs text-gray-400 max-w-sm mx-auto mt-1">
-                          When visitors book or request meetings through /schedule, they will show up here in real-time and notify thiranprivateltd@gmail.com.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {meetingRequests.map((req) => (
-                          <div key={req.id} className="glass-panel p-5 rounded-2xl border border-white/10 hover:border-[#D4A54A]/40 space-y-3 transition-colors">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <span className="inline-block px-2.5 py-0.5 rounded text-[10px] font-heading font-bold uppercase bg-[#D4A54A]/15 text-[#D4A54A] border border-[#D4A54A]/30 mb-1.5">
-                                  {req.purpose}
-                                </span>
-                                <h4 className="font-heading font-bold text-white text-base">{req.name}</h4>
-                                <p className="text-xs text-gray-400">{req.organization !== '-' ? req.organization : 'Individual / Independent'}</p>
-                              </div>
-
-                              <span className="text-[10px] font-mono text-gray-500">{req.date}</span>
-                            </div>
-
-                            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 text-xs text-gray-300">
-                              <span className="text-gray-500 font-mono text-[10px] block mb-1">AGENDA / MESSAGE:</span>
-                              <p className="italic">"{req.message}"</p>
-                            </div>
-
-                            <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
-                              <span className="text-gray-400">
-                                Requested: <strong className="text-white">{req.personName}</strong>
-                              </span>
-
-                              <a
-                                href={`mailto:${req.email}?subject=Regarding Your Meeting Request with Thiran (${req.personName})`}
-                                className="px-3 py-1.5 rounded-lg bg-[#D4A54A] text-[#1A1425] font-heading font-bold text-[10px] uppercase tracking-wider hover:bg-[#c3943b] transition-colors"
-                              >
-                                Reply & Send Link
-                              </a>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </motion.div>
                 )}
 
