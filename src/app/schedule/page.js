@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Calendar, 
+  Calendar as CalendarIcon, 
   Clock, 
-  Users, 
   Briefcase, 
   Building2, 
   Tv, 
@@ -16,34 +15,38 @@ import {
   ExternalLink,
   ShieldCheck,
   Send,
-  UserCheck
+  UserCheck,
+  CalendarCheck,
+  Video,
+  Download,
+  Check
 } from 'lucide-react';
 import SectionEyebrow from '@/components/SectionEyebrow';
 import GlassCard from '@/components/GlassCard';
-import ScrollReveal from '@/components/ScrollReveal';
+import confetti from 'canvas-confetti';
 
-// Purpose routing configuration
+// 1. Purpose Routing Configuration
 const purposes = [
   {
     id: 'investment',
     title: 'Investment Inquiry',
     icon: Briefcase,
     desc: 'Angel investors, venture funds & strategic growth partners.',
-    peopleIds: ['varshith', 'dharshan', 'sasi']
+    peopleIds: ['varshith', 'dharshan', 'brundavanam']
   },
   {
     id: 'partnership',
     title: 'Partnership / Institution',
     icon: Building2,
     desc: 'Colleges, schools, enterprise software & strategic tie-ups.',
-    peopleIds: ['varshith', 'dharshan', 'brundavanam']
+    peopleIds: ['rahav', 'mukunthan', 'praveena']
   },
   {
     id: 'press',
     title: 'Media / Press',
     icon: Tv,
     desc: 'Interviews, podcast appearances, press releases & publications.',
-    peopleIds: ['navasri', 'varshith']
+    peopleIds: ['akash', 'mukunthan']
   },
   {
     id: 'guidance',
@@ -61,139 +64,178 @@ const purposes = [
   }
 ];
 
-// Available team & leadership profiles for booking
+// 2. Official Team Roster with Outlook Email IDs
 const allPeople = [
   {
     id: 'varshith',
-    name: 'G S Varshith',
+    name: 'Varshith G S',
     role: 'Founder & CEO',
-    subtitle: 'Strategic Vision, Product & Capital',
-    type: 'founder', // direct calendar booking for investment/partnership, gated for others
-    calLink: 'https://cal.com', // placeholder integration embed url
-    image: '/founder.jpg',
-    initials: 'GV'
+    email: 'ceothiran@outlook.com',
+    subtitle: 'Strategic Vision, Capital & Leadership',
+    initials: 'VG',
+    image: '/founder.jpg'
   },
   {
     id: 'dharshan',
     name: 'Dharshan S',
     role: 'Co-Founder & COO',
-    subtitle: 'Operations, LaunchLab & Partnerships',
-    type: 'founder',
-    calLink: 'https://cal.com',
-    image: null,
-    initials: 'DS'
-  },
-  {
-    id: 'sasi',
-    name: 'Sasi',
-    role: 'Legal Mentor & Board Advisor',
-    subtitle: 'Compliance & Institutional Structuring',
-    type: 'advisor', // gated request form
-    calLink: null,
-    image: null,
-    initials: 'SA'
+    email: 'coothiran@outlook.com',
+    subtitle: 'Operations, LaunchLab & Expansion',
+    initials: 'DS',
+    image: null
   },
   {
     id: 'brundavanam',
     name: 'Brundavanam P',
     role: 'Project Manager',
-    subtitle: 'Ecosystem Operations & Institutional Delivery',
-    type: 'lead',
-    calLink: 'https://cal.com',
-    image: null,
-    initials: 'BP'
+    email: 'projectmanagerthiran@outlook.com',
+    subtitle: 'Ecosystem Operations & Project Delivery',
+    initials: 'BP',
+    image: null
   },
   {
-    id: 'navasri',
-    name: 'Navasri N',
-    role: 'Content & Communication Manager',
-    subtitle: 'Press Relations & Editorial Comms',
-    type: 'lead',
-    calLink: 'https://cal.com',
-    image: null,
-    initials: 'NN'
+    id: 'rahav',
+    name: 'Rahav V K',
+    role: 'Product Manager',
+    email: 'productmanagerthiran@outlook.com',
+    subtitle: 'Product Strategy & Institutional Alliances',
+    initials: 'RV',
+    image: null
+  },
+  {
+    id: 'mukunthan',
+    name: 'Mukunthan S',
+    role: 'Tech Lead',
+    email: 'techleadthiran@outlook.com',
+    subtitle: 'Platform Architecture & Tech Integrations',
+    initials: 'MS',
+    image: null
+  },
+  {
+    id: 'praveena',
+    name: 'Praveena R',
+    role: 'HR Coordinator',
+    email: 'hrcoordinatorthiran@outlook.com',
+    subtitle: 'Talent, Institutional Hiring & People Operations',
+    initials: 'PR',
+    image: null
+  },
+  {
+    id: 'akash',
+    name: 'Akash M',
+    role: 'Digital Media Lead',
+    email: 'digitalmediathiran@outlook.com',
+    subtitle: 'Press Relations, Media & Digital Broadcasts',
+    initials: 'AM',
+    image: null
   },
   {
     id: 'hariharan',
     name: 'Hari Haran V',
     role: 'Career Research Analyst',
+    email: 'careerresearchanalystthiran@outlook.com',
     subtitle: 'NextStep Student Counseling & AI Data',
-    type: 'lead',
-    calLink: 'https://cal.com',
-    image: null,
-    initials: 'HV'
+    initials: 'HV',
+    image: null
   },
   {
     id: 'keerthana',
     name: 'Keerthana P S',
     role: 'AI/ML Developer',
+    email: 'aimldevthiran@outlook.com',
     subtitle: 'NextStep Diagnostics & Technical Mentorship',
-    type: 'lead',
-    calLink: 'https://cal.com',
-    image: null,
-    initials: 'KP'
+    initials: 'KP',
+    image: null
   }
 ];
 
+// Preset Slots Generator
+const presetSlots = [
+  '10:00 AM - 10:30 AM',
+  '11:30 AM - 12:00 PM',
+  '02:00 PM - 02:30 PM',
+  '03:30 PM - 04:00 PM',
+  '05:00 PM - 05:30 PM',
+  '06:30 PM - 07:00 PM'
+];
+
 export default function SchedulePage() {
+  // Step 1: Purpose
   const [selectedPurpose, setSelectedPurpose] = useState('investment');
+  // Step 2: Person
   const [selectedPerson, setSelectedPerson] = useState(null);
   
-  // Gated form state
+  // Step 3: Date & Slot (Preset or Custom)
+  const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  const [selectedDate, setSelectedDate] = useState(tomorrowStr);
+  const [slotType, setSlotType] = useState('preset'); // 'preset' | 'custom'
+  const [selectedSlot, setSelectedSlot] = useState(presetSlots[2]);
+  const [customStartTime, setCustomStartTime] = useState('15:00');
+  const [customDuration, setCustomDuration] = useState('30');
+  
+  // Step 4: Form details
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     organization: '',
+    mode: 'Microsoft Teams / Outlook Video',
     message: ''
   });
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [confirmedData, setConfirmedData] = useState(null);
 
-  // Filter people matching current purpose
+  // Filter available people based on purpose
   const currentPurposeObj = purposes.find((p) => p.id === selectedPurpose);
   const availablePeople = allPeople.filter((person) => 
     currentPurposeObj?.peopleIds.includes(person.id)
   );
 
-  // Check if current person + purpose has direct calendar access vs gated request
-  // Direct calendar for Founders is enabled only for Investment & Partnership to preserve bandwidth
-  const hasDirectCalendar = (person) => {
-    if (person.type === 'advisor') return false;
-    if (person.type === 'founder') {
-      return selectedPurpose === 'investment' || selectedPurpose === 'partnership';
-    }
-    return true; // regular leads have open calendar slots for their designated area
-  };
-
   const handlePurposeChange = (purposeId) => {
     setSelectedPurpose(purposeId);
     setSelectedPerson(null);
-    setFormSubmitted(false);
+    setBookingConfirmed(false);
   };
 
   const handlePersonSelect = (person) => {
     setSelectedPerson(person);
-    setFormSubmitted(false);
+    setBookingConfirmed(false);
   };
 
-  const handleSubmitForm = async (e) => {
+  // Get active time string
+  const activeTimeSlot = slotType === 'preset' 
+    ? selectedSlot 
+    : `${customStartTime} (${customDuration} mins)`;
+
+  const handleSubmitBooking = async (e) => {
     e.preventDefault();
+    if (!selectedPerson) return;
+
+    setIsSubmitting(true);
     try {
-      // 1. Post to Schedule API
-      await fetch('/api/schedule', {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        organization: formData.organization,
+        purpose: currentPurposeObj?.title,
+        personName: selectedPerson.name,
+        personEmail: selectedPerson.email,
+        date: selectedDate,
+        timeSlot: activeTimeSlot,
+        mode: formData.mode,
+        message: formData.message
+      };
+
+      const res = await fetch('/api/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          organization: formData.organization,
-          purpose: currentPurposeObj?.title,
-          personName: selectedPerson?.name,
-          message: formData.message,
-          type: 'Gated Request'
-        })
+        body: JSON.stringify(payload)
       });
 
-      // 2. Persist to local bookings for instant Admin Portal viewing
+      const data = await res.json();
+
+      // Persist to local bookings for instant Admin Portal viewing
       const existingBookings = JSON.parse(localStorage.getItem('thiran_meeting_requests') || '[]');
       const newBooking = {
         id: `REQ-${Date.now()}`,
@@ -201,18 +243,60 @@ export default function SchedulePage() {
         email: formData.email,
         organization: formData.organization || '-',
         purpose: currentPurposeObj?.title || 'General',
-        personName: selectedPerson?.name || 'Team Member',
+        personName: selectedPerson.name,
+        personEmail: selectedPerson.email,
+        date: selectedDate,
+        timeSlot: activeTimeSlot,
         message: formData.message,
-        date: new Date().toISOString().split('T')[0],
-        status: 'Pending Review'
+        status: 'Confirmed & Synced'
       };
       localStorage.setItem('thiran_meeting_requests', JSON.stringify([newBooking, ...existingBookings]));
 
-      setFormSubmitted(true);
+      setConfirmedData({
+        ...payload,
+        icsData: data.icsData
+      });
+      setBookingConfirmed(true);
+
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#D4AF37', '#1D9E75', '#3B82F6']
+      });
+
     } catch (err) {
-      console.error('Error submitting booking request:', err);
-      setFormSubmitted(true);
+      console.error('Error submitting booking:', err);
+      setBookingConfirmed(true);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const downloadICSFile = () => {
+    if (!confirmedData?.icsData) return;
+    const blob = new Blob([confirmedData.icsData], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Thiran_Meeting_${confirmedData.personName.replace(/\s+/g, '_')}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Generate Outlook Web link for instant 1-click add
+  const getOutlookWebLink = () => {
+    if (!confirmedData) return '#';
+    const title = encodeURIComponent(`[Thiran Meeting] ${confirmedData.purpose} with ${confirmedData.personName}`);
+    const body = encodeURIComponent(`Scheduled session with ${confirmedData.personName} (${confirmedData.personEmail}).\n\nAgenda:\n${confirmedData.message}`);
+    const location = encodeURIComponent(confirmedData.mode || 'Microsoft Teams');
+    
+    const startIso = new Date(`${confirmedData.date}T10:00:00Z`).toISOString();
+    const endIso = new Date(`${confirmedData.date}T10:30:00Z`).toISOString();
+    
+    return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&body=${body}&location=${location}&startdt=${startIso}&enddt=${endIso}`;
   };
 
   return (
@@ -225,8 +309,8 @@ export default function SchedulePage() {
         
         {/* 1. Page Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <SectionEyebrow icon={Calendar} className="mb-4">
-            SCHEDULE A MEETING
+          <SectionEyebrow icon={CalendarIcon} className="mb-4">
+            MICROSOFT OUTLOOK & TEAMS SCHEDULING
           </SectionEyebrow>
 
           <motion.h1 
@@ -235,7 +319,7 @@ export default function SchedulePage() {
             transition={{ duration: 0.5 }}
             className="font-heading text-4xl md:text-6xl font-black uppercase tracking-tight text-white mb-4"
           >
-            Let's <span className="text-[#D4A54A]">talk</span>
+            Schedule a <span className="text-[#D4A54A]">Meeting</span>
           </motion.h1>
 
           <motion.div 
@@ -245,18 +329,18 @@ export default function SchedulePage() {
             className="flex items-center justify-center space-x-2 text-[#B8A9A0] text-sm md:text-base"
           >
             <Clock className="w-4 h-4 text-[#D4A54A]" />
-            <span>We typically respond within 2 business days</span>
+            <span>Direct Outlook Calendar sync • 24hr prior reminder included</span>
           </motion.div>
         </div>
 
         {/* 2. Step 1: Purpose Selector */}
-        <div className="mb-16">
+        <div className="mb-14">
           <div className="flex items-center space-x-3 mb-6">
             <span className="w-7 h-7 rounded-full bg-[#D4A54A] text-[#1A1425] font-black text-xs flex items-center justify-center font-heading">
               1
             </span>
             <h2 className="font-heading text-lg md:text-xl font-bold uppercase tracking-wider text-white">
-              What is the purpose of your meeting?
+              Select Purpose
             </h2>
           </div>
 
@@ -284,8 +368,9 @@ export default function SchedulePage() {
                       <Icon className="w-5 h-5" />
                     </div>
                     {isSelected && (
-                      <span className="text-[#D4A54A] text-xs font-heading font-bold uppercase tracking-wider bg-[#D4A54A]/10 px-2.5 py-0.5 rounded-full border border-[#D4A54A]/30">
-                        Selected
+                      <span className="text-[#D4A54A] text-xs font-heading font-bold uppercase tracking-wider bg-[#D4A54A]/10 px-2.5 py-0.5 rounded-full border border-[#D4A54A]/30 flex items-center space-x-1">
+                        <Check className="w-3 h-3" />
+                        <span>Active</span>
                       </span>
                     )}
                   </div>
@@ -302,31 +387,30 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* 3. Step 2: Person Selector (Filtered by Purpose) */}
-        <div className="mb-16">
+        {/* 3. Step 2: Team Member Selector */}
+        <div className="mb-14">
           <div className="flex items-center space-x-3 mb-6">
             <span className="w-7 h-7 rounded-full bg-[#D4A54A] text-[#1A1425] font-black text-xs flex items-center justify-center font-heading">
               2
             </span>
             <h2 className="font-heading text-lg md:text-xl font-bold uppercase tracking-wider text-white">
-              Select team member or leadership
+              Select Team Member
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {availablePeople.map((person) => {
               const isSelected = selectedPerson?.id === person.id;
-              const directCal = hasDirectCalendar(person);
 
               return (
                 <GlassCard
                   key={person.id}
-                  className={`p-6 flex flex-col justify-between transition-all ${
-                    isSelected ? 'ring-2 ring-[#D4A54A] bg-[#2B1420]/70' : ''
+                  className={`p-6 flex flex-col justify-between transition-all cursor-pointer ${
+                    isSelected ? 'ring-2 ring-[#D4A54A] bg-[#2B1420]/80' : 'hover:border-[#D4A54A]/40'
                   }`}
+                  onClick={() => handlePersonSelect(person)}
                 >
                   <div>
-                    {/* Header with Photo/Initials */}
                     <div className="flex items-center space-x-4 mb-4">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-white/15 overflow-hidden flex items-center justify-center flex-shrink-0">
                         {person.image ? (
@@ -338,44 +422,36 @@ export default function SchedulePage() {
                         )}
                       </div>
 
-                      <div>
-                        <h3 className="font-heading text-base font-bold text-white">
+                      <div className="min-w-0">
+                        <h3 className="font-heading text-base font-bold text-white truncate">
                           {person.name}
                         </h3>
-                        <p className="text-xs font-semibold text-[#D4A54A] tracking-wide">
+                        <p className="text-xs font-semibold text-[#D4A54A] tracking-wide truncate">
                           {person.role}
+                        </p>
+                        <p className="text-[10px] font-mono text-gray-400 truncate mt-0.5">
+                          {person.email}
                         </p>
                       </div>
                     </div>
 
-                    <p className="text-xs text-[#B8A9A0] mb-5">
+                    <p className="text-xs text-[#B8A9A0] mb-4">
                       {person.subtitle}
                     </p>
-
-                    <div className="flex items-center space-x-2 text-[11px] text-gray-400 mb-6">
-                      {directCal ? (
-                        <span className="inline-flex items-center text-emerald-400 font-medium">
-                          <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                          Direct calendar booking available
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center text-amber-400/90 font-medium">
-                          <ShieldCheck className="w-3.5 h-3.5 mr-1" />
-                          Reviewed request (link sent within 2 business days)
-                        </span>
-                      )}
-                    </div>
                   </div>
 
                   <button
-                    onClick={() => handlePersonSelect(person)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePersonSelect(person);
+                    }}
                     className={`w-full py-2.5 px-4 rounded-xl font-heading text-xs font-bold uppercase tracking-wider flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#D4A54A] text-[#1A1425] shadow-lg shadow-[#D4A54A]/20'
                         : 'bg-white/5 border border-white/15 text-white hover:bg-[#D4A54A]/10 hover:border-[#D4A54A]/40 hover:text-[#D4A54A]'
                     }`}
                   >
-                    <span>{isSelected ? 'Selected' : (directCal ? 'Book Time' : 'Request Meeting')}</span>
+                    <span>{isSelected ? 'Selected Member' : 'Choose Member'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </GlassCard>
@@ -384,7 +460,7 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        {/* 4. Step 3: Booking Action (Direct Calendar Embed OR Gated Request Form) */}
+        {/* 4. Step 3 & 4: Time Slot Selection & Confirmation Form */}
         <AnimatePresence mode="wait">
           {selectedPerson && (
             <motion.div
@@ -393,128 +469,205 @@ export default function SchedulePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.4 }}
-              className="mt-12"
+              className="space-y-12"
             >
-              <div className="flex items-center space-x-3 mb-6">
-                <span className="w-7 h-7 rounded-full bg-[#D4A54A] text-[#1A1425] font-black text-xs flex items-center justify-center font-heading">
-                  3
-                </span>
-                <h2 className="font-heading text-lg md:text-xl font-bold uppercase tracking-wider text-white">
-                  {hasDirectCalendar(selectedPerson) 
-                    ? `Pick a slot with ${selectedPerson.name}`
-                    : `Submit meeting request for ${selectedPerson.name}`
-                  }
-                </h2>
-              </div>
-
-              {hasDirectCalendar(selectedPerson) ? (
-                /* CALENDAR EMBED WIDGET */
-                <GlassCard className="p-6 md:p-8 border-[#D4A54A]/30">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-6 border-b border-white/10 gap-4 mb-6">
-                    <div>
-                      <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono mb-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>Live Calendar Connected</span>
-                      </div>
-                      <h3 className="font-heading text-xl font-bold text-white">
-                        {selectedPerson.name} — 30 Min Discussion
-                      </h3>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        Focus: {currentPurposeObj?.title}
-                      </p>
-                    </div>
-
-                    <a
-                      href={selectedPerson.calLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-heading text-[#D4A54A] hover:bg-[#D4A54A]/10 transition-colors flex items-center space-x-1.5"
-                    >
-                      <span>Open in new tab</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+              {bookingConfirmed ? (
+                /* 5. SUCCESS / CONFIRMED SCREEN */
+                <GlassCard className="p-8 md:p-12 border-[#D4A54A]/50 text-center space-y-6">
+                  <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                    <CheckCircle2 className="w-10 h-10" />
                   </div>
 
-                  {/* Clean branded calendar mock embed with interactive booking simulation */}
-                  <div className="bg-[#1A1425]/90 border border-white/10 rounded-2xl p-6 sm:p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {/* Left: meeting details */}
-                      <div className="space-y-4">
-                        <h4 className="font-heading text-sm font-bold text-[#D4A54A] uppercase tracking-wider">
-                          Meeting Agenda & Terms
-                        </h4>
-                        <div className="space-y-3 text-xs text-gray-300">
-                          <p className="flex items-center space-x-2">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <span>30 Minutes • Google Meet / Zoom</span>
-                          </p>
-                          <p className="flex items-center space-x-2">
-                            <UserCheck className="w-4 h-4 text-gray-400" />
-                            <span>Direct 1-on-1 with {selectedPerson.name}</span>
-                          </p>
-                        </div>
+                  <div>
+                    <span className="inline-block px-3 py-1 rounded-full bg-[#D4A54A]/10 text-[#D4A54A] border border-[#D4A54A]/30 text-xs font-heading font-bold uppercase tracking-widest mb-3">
+                      Booking Confirmed & Outlook Sync Active
+                    </span>
+                    <h2 className="font-heading text-3xl md:text-4xl font-black text-white">
+                      Meeting Scheduled with {confirmedData?.personName}
+                    </h2>
+                    <p className="text-sm text-gray-300 max-w-lg mx-auto mt-2">
+                      An official meeting invitation with Outlook calendar synchronization and a <strong>1-day prior notification reminder</strong> has been dispatched.
+                    </p>
+                  </div>
 
-                        <p className="text-xs text-gray-400 leading-relaxed pt-2">
-                          Please ensure you have a brief summary or deck ready for context if this is regarding investment or institutional partnership.
-                        </p>
-                      </div>
-
-                      {/* Right: Embedded Interactive Booking Picker */}
-                      <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 text-center">
-                        <p className="text-xs font-heading font-semibold text-gray-300 mb-4">
-                          Select Next Available Working Window
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 mb-4">
-                          {['Tomorrow, 3:00 PM', 'Tomorrow, 5:30 PM', 'Thursday, 11:00 AM', 'Thursday, 4:00 PM'].map((slot, i) => (
-                            <button
-                              key={i}
-                              onClick={() => alert(`Selected slot: ${slot} with ${selectedPerson.name}. Confirmation email will be sent.`)}
-                              className="py-2.5 px-2 rounded-lg bg-[#2B1420]/80 border border-[#D4A54A]/30 text-xs font-medium text-white hover:bg-[#D4A54A] hover:text-[#1A1425] transition-all cursor-pointer"
-                            >
-                              {slot}
-                            </button>
-                          ))}
-                        </div>
-                        <p className="text-[10px] text-gray-500">
-                          Times displayed in your local timezone (IST)
-                        </p>
-                      </div>
+                  <div className="bg-[#1A1425]/90 border border-white/10 rounded-2xl p-6 max-w-xl mx-auto text-left space-y-3 text-xs md:text-sm">
+                    <div className="flex justify-between border-b border-white/10 pb-2">
+                      <span className="text-gray-400">Team Member:</span>
+                      <span className="text-white font-bold">{confirmedData?.personName} ({confirmedData?.personEmail})</span>
                     </div>
+                    <div className="flex justify-between border-b border-white/10 pb-2">
+                      <span className="text-gray-400">Scheduled Date:</span>
+                      <span className="text-[#D4A54A] font-bold">{confirmedData?.date}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-white/10 pb-2">
+                      <span className="text-gray-400">Time Window:</span>
+                      <span className="text-[#D4A54A] font-bold">{confirmedData?.timeSlot}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-white/10 pb-2">
+                      <span className="text-gray-400">Platform:</span>
+                      <span className="text-white">{confirmedData?.mode}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Attendee Email:</span>
+                      <span className="text-white font-mono">{confirmedData?.email}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+                    <button
+                      onClick={downloadICSFile}
+                      className="px-6 py-3.5 rounded-xl bg-[#D4A54A] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-wider flex items-center space-x-2 shadow-lg shadow-[#D4A54A]/20 hover:bg-[#c3943b] transition-all cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download .ICS (Outlook / iCal)</span>
+                    </button>
+
+                    <a
+                      href={getOutlookWebLink()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-3.5 rounded-xl bg-white/5 border border-white/15 text-white hover:bg-white/10 font-heading font-bold text-xs uppercase tracking-wider flex items-center space-x-2 transition-all"
+                    >
+                      <span>Add to Outlook Web</span>
+                      <ExternalLink className="w-4 h-4 text-[#D4A54A]" />
+                    </a>
+
+                    <button
+                      onClick={() => setBookingConfirmed(false)}
+                      className="px-6 py-3.5 rounded-xl text-gray-400 hover:text-white font-heading text-xs font-bold uppercase tracking-wider"
+                    >
+                      Schedule Another
+                    </button>
                   </div>
                 </GlassCard>
               ) : (
-                /* GATED REQUEST FORM */
-                <GlassCard className="p-6 md:p-10 border-[#D4A54A]/30">
-                  {formSubmitted ? (
-                    <div className="text-center py-10 space-y-4">
-                      <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
-                        <CheckCircle2 className="w-8 h-8" />
-                      </div>
-                      <h3 className="font-heading text-2xl font-bold text-white">
-                        Request Received
-                      </h3>
-                      <p className="text-sm text-gray-300 max-w-md mx-auto">
-                        We'll review your request with <strong className="text-[#D4A54A]">{selectedPerson.name}</strong> and send a direct scheduling link within 2 business days.
-                      </p>
-                      <button
-                        onClick={() => setFormSubmitted(false)}
-                        className="px-6 py-2.5 rounded-full bg-white/5 border border-white/15 text-xs font-heading font-bold text-white hover:bg-white/10 transition-colors cursor-pointer mt-4"
-                      >
-                        Submit Another Request
-                      </button>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  
+                  {/* Step 3: Date & Slot Picker (Preset or Custom) */}
+                  <div className="lg:col-span-6 space-y-6">
+                    <div className="flex items-center space-x-3">
+                      <span className="w-7 h-7 rounded-full bg-[#D4A54A] text-[#1A1425] font-black text-xs flex items-center justify-center font-heading">
+                        3
+                      </span>
+                      <h2 className="font-heading text-lg md:text-xl font-bold uppercase tracking-wider text-white">
+                        Select Date & Slot
+                      </h2>
                     </div>
-                  ) : (
-                    <div>
-                      <div className="mb-6 pb-4 border-b border-white/10">
-                        <h3 className="font-heading text-xl font-bold text-white">
-                          Schedule Request for {selectedPerson.name}
-                        </h3>
-                        <p className="text-xs text-[#B8A9A0] mt-1">
-                          Advisory and special leadership sessions are curated to ensure relevant preparation.
-                        </p>
+
+                    <GlassCard className="p-6 space-y-5 border-white/10">
+                      <div>
+                        <label className="block text-xs font-heading uppercase tracking-wider text-gray-300 mb-2">
+                          1. Choose Date
+                        </label>
+                        <input
+                          type="date"
+                          min={new Date().toISOString().split('T')[0]}
+                          value={selectedDate}
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-[#D4A54A]"
+                        />
                       </div>
 
-                      <form onSubmit={handleSubmitForm} className="space-y-4 max-w-2xl">
+                      {/* Slot Type Toggle: Preset vs Custom Slot */}
+                      <div>
+                        <label className="block text-xs font-heading uppercase tracking-wider text-gray-300 mb-2">
+                          2. Time Slot Preference
+                        </label>
+                        <div className="grid grid-cols-2 gap-2 p-1 bg-white/5 rounded-xl border border-white/10 mb-4">
+                          <button
+                            type="button"
+                            onClick={() => setSlotType('preset')}
+                            className={`py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                              slotType === 'preset' ? 'bg-[#D4A54A] text-[#1A1425]' : 'text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            Suggested Slots
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSlotType('custom')}
+                            className={`py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                              slotType === 'custom' ? 'bg-[#D4A54A] text-[#1A1425]' : 'text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            Request Custom Slot
+                          </button>
+                        </div>
+
+                        {slotType === 'preset' ? (
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {presetSlots.map((slot) => {
+                              const isSlotSelected = selectedSlot === slot;
+                              return (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  onClick={() => setSelectedSlot(slot)}
+                                  className={`p-3 rounded-xl border text-xs font-medium transition-all text-left flex items-center justify-between cursor-pointer ${
+                                    isSlotSelected
+                                      ? 'bg-[#2B1420] border-[#D4A54A] text-white shadow-md shadow-[#D4A54A]/20'
+                                      : 'bg-white/[0.02] border-white/10 text-gray-300 hover:border-[#D4A54A]/40'
+                                  }`}
+                                >
+                                  <span>{slot}</span>
+                                  {isSlotSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A54A]" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="space-y-3 p-4 bg-white/[0.02] border border-white/10 rounded-xl">
+                            <p className="text-xs text-[#D4A54A] font-medium">
+                              Specify your convenient start time and duration:
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[10px] text-gray-400 uppercase mb-1">Start Time</label>
+                                <input
+                                  type="time"
+                                  value={customStartTime}
+                                  onChange={(e) => setCustomStartTime(e.target.value)}
+                                  className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-xs text-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-gray-400 uppercase mb-1">Duration</label>
+                                <select
+                                  value={customDuration}
+                                  onChange={(e) => setCustomDuration(e.target.value)}
+                                  className="w-full bg-[#1A1425] border border-white/10 rounded-lg p-2.5 text-xs text-white"
+                                >
+                                  <option value="20">20 Minutes</option>
+                                  <option value="30">30 Minutes</option>
+                                  <option value="45">45 Minutes</option>
+                                  <option value="60">60 Minutes</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center space-x-3 text-xs text-gray-300">
+                        <CalendarCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                        <span>Outlook Calendar invite automatically alerts both participants <strong>24 hours prior</strong>.</span>
+                      </div>
+                    </GlassCard>
+                  </div>
+
+                  {/* Step 4: Attendee Details & Agenda Form */}
+                  <div className="lg:col-span-6 space-y-6">
+                    <div className="flex items-center space-x-3">
+                      <span className="w-7 h-7 rounded-full bg-[#D4A54A] text-[#1A1425] font-black text-xs flex items-center justify-center font-heading">
+                        4
+                      </span>
+                      <h2 className="font-heading text-lg md:text-xl font-bold uppercase tracking-wider text-white">
+                        Meeting Details
+                      </h2>
+                    </div>
+
+                    <GlassCard className="p-6 border-[#D4A54A]/30">
+                      <form onSubmit={handleSubmitBooking} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs font-heading uppercase tracking-wider text-gray-300 mb-1.5">
@@ -539,7 +692,7 @@ export default function SchedulePage() {
                               required
                               value={formData.email}
                               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                              placeholder="name@organization.com"
+                              placeholder="yourname@domain.com"
                               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A54A]"
                             />
                           </div>
@@ -554,51 +707,72 @@ export default function SchedulePage() {
                               type="text"
                               value={formData.organization}
                               onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                              placeholder="Optional (e.g. VC Firm, University)"
+                              placeholder="Optional (e.g. VC Fund, College)"
                               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A54A]"
                             />
                           </div>
 
                           <div>
                             <label className="block text-xs font-heading uppercase tracking-wider text-gray-300 mb-1.5">
-                              Selected Purpose
+                              Meeting Platform
                             </label>
-                            <input
-                              type="text"
-                              disabled
-                              value={currentPurposeObj?.title || ''}
-                              className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs text-[#D4A54A] font-semibold cursor-not-allowed"
-                            />
+                            <select
+                              value={formData.mode}
+                              onChange={(e) => setFormData({ ...formData, mode: e.target.value })}
+                              className="w-full bg-[#1A1425] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-[#D4A54A]"
+                            >
+                              <option value="Microsoft Teams / Outlook Video">Microsoft Teams (Outlook Video)</option>
+                              <option value="Google Meet">Google Meet</option>
+                              <option value="Zoom Meeting">Zoom Meeting</option>
+                              <option value="Phone Call (Voice)">Phone Call (Voice)</option>
+                            </select>
                           </div>
                         </div>
 
                         <div>
                           <label className="block text-xs font-heading uppercase tracking-wider text-gray-300 mb-1.5">
-                            Brief Agenda / Message *
+                            Brief Agenda / Discussion Points *
                           </label>
                           <textarea
                             rows={3}
                             required
                             value={formData.message}
                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                            placeholder="Share a short summary of what you'd like to discuss..."
+                            placeholder="Please summarize the agenda, objectives or questions for the session..."
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A54A]"
                           />
                         </div>
 
-                        <div className="pt-2">
-                          <button
-                            type="submit"
-                            className="px-8 py-3.5 rounded-full bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 flex items-center space-x-2 shadow-lg shadow-[#D4A54A]/20 cursor-pointer"
-                          >
-                            <span>Submit Request</span>
-                            <Send className="w-3.5 h-3.5" />
-                          </button>
+                        <div className="p-3 bg-[#2B1420]/60 border border-[#D4A54A]/30 rounded-xl text-xs space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Selected Host:</span>
+                            <strong className="text-white">{selectedPerson.name} ({selectedPerson.email})</strong>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Date & Slot:</span>
+                            <strong className="text-[#D4A54A]">{selectedDate} • {activeTimeSlot}</strong>
+                          </div>
                         </div>
+
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full py-4 rounded-xl bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-widest transition-all hover:scale-[1.01] flex items-center justify-center space-x-2 shadow-lg shadow-[#D4A54A]/20 cursor-pointer disabled:opacity-50"
+                        >
+                          {isSubmitting ? (
+                            <span>Scheduling & Generating Outlook Invite...</span>
+                          ) : (
+                            <>
+                              <span>Confirm & Schedule Meeting</span>
+                              <Send className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
                       </form>
-                    </div>
-                  )}
-                </GlassCard>
+                    </GlassCard>
+                  </div>
+
+                </div>
               )}
             </motion.div>
           )}
