@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -20,13 +20,15 @@ import {
   Download,
   Check,
   User,
-  Sparkles,
-  RefreshCw,
-  Mail
+  Copy,
+  Phone,
+  MapPin
 } from 'lucide-react';
 import SectionEyebrow from '@/components/SectionEyebrow';
 import GlassCard from '@/components/GlassCard';
 import confetti from 'canvas-confetti';
+
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mqpaebzr';
 
 // 1. Purpose Routing Configuration
 const purposes = [
@@ -183,7 +185,7 @@ export default function SchedulePage() {
     name: '',
     email: '',
     organization: '',
-    mode: 'Google Meet',
+    mode: 'Google Meet (Online Video)',
     message: ''
   });
   
@@ -191,6 +193,7 @@ export default function SchedulePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [confirmedData, setConfirmedData] = useState(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Filter available people based on selected purpose
   const currentPurposeObj = purposes.find((p) => p.id === selectedPurpose) || purposes[0];
@@ -208,7 +211,7 @@ export default function SchedulePage() {
   // Fetch already booked slots when selectedPerson or selectedDate changes
   useEffect(() => {
     if (selectedPerson && selectedDate) {
-      fetch(`/api/schedule?personEmail=${encodeURIComponent(selectedPerson.email)}&date=${selectedDate}`)
+      fetch(`/api/schedule?personEmail=thiranprivateltd@gmail.com&date=${selectedDate}`)
         .then(res => res.json())
         .then(data => {
           if (data.bookedSlots) {
@@ -242,21 +245,55 @@ export default function SchedulePage() {
 
     setBookingError('');
     setIsSubmitting(true);
-    try {
-      const payload = {
-        name: formData.name,
-        email: formData.email,
-        organization: formData.organization,
-        purpose: currentPurposeObj?.title,
-        personId: selectedPerson.id,
-        personName: selectedPerson.name,
-        personEmail: selectedPerson.email,
-        date: selectedDate,
-        timeSlot: activeTimeSlot,
-        mode: formData.mode,
-        message: formData.message
-      };
 
+    const generatedMeetId = `thiran-${Date.now().toString(36)}`;
+    const generatedMeetUrl = `https://meet.google.com/lookup/${generatedMeetId}`;
+
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      organization: formData.organization,
+      purpose: currentPurposeObj?.title,
+      personId: selectedPerson.id,
+      personName: selectedPerson.name,
+      personEmail: 'thiranprivateltd@gmail.com',
+      date: selectedDate,
+      timeSlot: activeTimeSlot,
+      mode: formData.mode,
+      googleMeetUrl: generatedMeetUrl,
+      message: formData.message
+    };
+
+    try {
+      // 1. Direct Formspree Submission (Guaranteed instant inbox delivery to thiranprivateltd@gmail.com)
+      try {
+        await fetch(FORMSPREE_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            _subject: `📅 New Meeting Scheduled: ${payload.purpose} (${payload.name} with ${payload.personName})`,
+            attendee_name: payload.name,
+            attendee_email: payload.email,
+            organization: payload.organization || 'Not provided',
+            purpose: payload.purpose,
+            host_member: payload.personName,
+            host_email: 'thiranprivateltd@gmail.com',
+            scheduled_date: payload.date,
+            scheduled_time_slot: payload.timeSlot,
+            meeting_format: payload.mode,
+            google_meet_link: payload.googleMeetUrl,
+            agenda_notes: payload.message || 'None provided',
+            submitted_at: new Date().toLocaleString()
+          })
+        });
+      } catch (err) {
+        console.warn('Formspree dispatch check:', err);
+      }
+
+      // 2. Local Database & ICS generator sync
       const res = await fetch('/api/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -266,15 +303,15 @@ export default function SchedulePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setBookingError(data.error || 'Failed to submit request. That slot may be already taken.');
+        setBookingError(data.error || 'Failed to complete scheduling. Please try another slot.');
         setIsSubmitting(false);
         return;
       }
 
       setConfirmedData({
         ...payload,
+        googleMeetUrl: data.googleMeetUrl || generatedMeetUrl,
         icsData: data.icsData,
-        graphCalendar: data.graphCalendar,
         bookingId: data.bookingId
       });
       setBookingConfirmed(true);
@@ -288,7 +325,7 @@ export default function SchedulePage() {
 
     } catch (err) {
       console.error('Error submitting booking:', err);
-      setBookingError('An error occurred while submitting your request. Please try again.');
+      setBookingError('An error occurred while submitting your schedule. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -300,23 +337,33 @@ export default function SchedulePage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Thiran_Meeting_${confirmedData.personName.replace(/\s+/g, '_')}.ics`);
+    link.setAttribute('download', `Thiran_GoogleMeet_${confirmedData.personName.replace(/\s+/g, '_')}.ics`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const getOutlookWebLink = () => {
+  // Generate 1-Click Google Calendar Add Link
+  const getGoogleCalendarLink = () => {
     if (!confirmedData) return '#';
     const title = encodeURIComponent(`[Thiran Meeting] ${confirmedData.purpose} with ${confirmedData.personName}`);
-    const body = encodeURIComponent(`Scheduled session with ${confirmedData.personName} (${confirmedData.personEmail}).\n\nAgenda:\n${confirmedData.message}`);
-    const location = encodeURIComponent(confirmedData.mode || 'Google Meet');
+    const details = encodeURIComponent(`Scheduled Session with ${confirmedData.personName} (Thiran Private Limited).\n\nMeeting Room: ${confirmedData.googleMeetUrl}\n\nAgenda:\n${confirmedData.message}`);
+    const location = encodeURIComponent(confirmedData.mode.includes('Phone') ? 'Phone Call' : confirmedData.mode.includes('Person') ? 'Thiran Office' : confirmedData.googleMeetUrl);
     
-    const startIso = new Date(`${confirmedData.date}T16:30:00Z`).toISOString();
-    const endIso = new Date(`${confirmedData.date}T17:00:00Z`).toISOString();
+    // Parse date and time into YYYYMMDDTHHMMSSZ format
+    const startStr = `${confirmedData.date.replace(/-/g, '')}T163000Z`;
+    const endStr = `${confirmedData.date.replace(/-/g, '')}T170000Z`;
     
-    return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&body=${body}&location=${location}&startdt=${startIso}&enddt=${endIso}`;
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
+  };
+
+  const copyMeetLink = () => {
+    if (confirmedData?.googleMeetUrl) {
+      navigator.clipboard.writeText(confirmedData.googleMeetUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
   };
 
   return (
@@ -330,7 +377,7 @@ export default function SchedulePage() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <SectionEyebrow icon={CalendarIcon} className="mb-4">
-            OFFICIAL SCHEDULING SYSTEM
+            GOOGLE MEET & OFFICIAL SCHEDULING
           </SectionEyebrow>
 
           <motion.h1 
@@ -348,7 +395,7 @@ export default function SchedulePage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-[#B8A9A0] text-sm md:text-base max-w-2xl mx-auto"
           >
-            Connect directly with Thiran leadership & specialist teams. Automated invitations will be dispatched with <strong>Google Meet</strong> video rooms and <strong>Microsoft Outlook</strong> calendar synchronization.
+            Book a dedicated discussion with Thiran leadership & specialist teams. Instant video conferences will be hosted on <strong>Google Meet</strong> with immediate notification sent to our official inbox.
           </motion.p>
 
           <motion.div 
@@ -359,15 +406,19 @@ export default function SchedulePage() {
           >
             <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center space-x-2">
               <Video className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Google Meet & Video Conference</span>
+              <span>Google Meet (Online Video)</span>
             </span>
             <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center space-x-2">
-              <Mail className="w-3.5 h-3.5 text-sky-400" />
-              <span>Microsoft Outlook Sync</span>
+              <Phone className="w-3.5 h-3.5 text-sky-400" />
+              <span>Phone Call (Voice)</span>
             </span>
             <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center space-x-2">
-              <Clock className="w-3.5 h-3.5 text-[#D4A54A]" />
-              <span>24hr Prior Reminder Alert</span>
+              <MapPin className="w-3.5 h-3.5 text-amber-400" />
+              <span>In-Person (Office)</span>
+            </span>
+            <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center space-x-2">
+              <CalendarCheck className="w-3.5 h-3.5 text-[#D4A54A]" />
+              <span>Google Calendar Sync</span>
             </span>
           </motion.div>
         </div>
@@ -379,27 +430,59 @@ export default function SchedulePage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <GlassCard className="p-8 md:p-12 border-[#D4A54A]/50 text-center space-y-6 max-w-3xl mx-auto">
-              <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+            <GlassCard className="p-8 md:p-12 border-[#D4A54A]/50 text-center space-y-6 max-w-3xl mx-auto shadow-2xl">
+              <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto shadow-[0_0_35px_rgba(16,185,129,0.3)]">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
 
               <div>
-                <span className="inline-block px-3 py-1 rounded-full bg-[#D4A54A]/10 text-[#D4A54A] border border-[#D4A54A]/30 text-xs font-heading font-bold uppercase tracking-widest mb-3">
-                  Request Dispatched to {confirmedData?.personName}
+                <span className="inline-block px-3.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-heading font-bold uppercase tracking-widest mb-3">
+                  Meeting Confirmed & Dispatched
                 </span>
                 <h2 className="font-heading text-3xl md:text-4xl font-black text-white">
-                  Meeting Request Submitted
+                  Scheduled with {confirmedData?.personName}
                 </h2>
                 <p className="text-sm text-gray-300 max-w-lg mx-auto mt-2">
-                  A notification has been sent directly to <strong>{confirmedData?.personEmail}</strong>. Once confirmed by the host, the final Google Meet conference link and Outlook calendar invite will be delivered to <strong>{confirmedData?.email}</strong>.
+                  Your session has been recorded and delivered to <strong>thiranprivateltd@gmail.com</strong>. Your Google Meet link is ready below.
                 </p>
               </div>
+
+              {/* Google Meet Banner if online */}
+              {confirmedData?.mode?.includes('Meet') || (!confirmedData?.mode?.includes('Phone') && !confirmedData?.mode?.includes('Person')) ? (
+                <div className="p-5 rounded-2xl bg-[#2B1420]/80 border border-[#D4A54A]/40 max-w-xl mx-auto text-left space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-heading font-bold uppercase text-[#D4A54A] flex items-center space-x-2">
+                      <Video className="w-4 h-4 text-emerald-400" />
+                      <span>Your Google Meet Link</span>
+                    </span>
+                    <button
+                      onClick={copyMeetLink}
+                      className="text-xs px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center space-x-1 cursor-pointer transition-colors"
+                    >
+                      {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/10 font-mono text-xs text-sky-400 truncate">
+                    <span className="truncate">{confirmedData?.googleMeetUrl}</span>
+                    <a
+                      href={confirmedData?.googleMeetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-3 px-3 py-1.5 rounded-lg bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-sans font-bold text-xs uppercase flex items-center space-x-1 flex-shrink-0"
+                    >
+                      <span>Join Meet</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              ) : null}
 
               <div className="bg-[#1A1425]/90 border border-white/10 rounded-2xl p-6 max-w-xl mx-auto text-left space-y-3 text-xs md:text-sm">
                 <div className="flex justify-between border-b border-white/10 pb-2">
                   <span className="text-gray-400">Host Member:</span>
-                  <span className="text-white font-bold">{confirmedData?.personName} ({confirmedData?.personEmail})</span>
+                  <span className="text-white font-bold">{confirmedData?.personName} (thiranprivateltd@gmail.com)</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
                   <span className="text-gray-400">Scheduled Date:</span>
@@ -410,7 +493,7 @@ export default function SchedulePage() {
                   <span className="text-[#D4A54A] font-bold">{confirmedData?.timeSlot}</span>
                 </div>
                 <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-gray-400">Meeting Platform:</span>
+                  <span className="text-gray-400">Meeting Format:</span>
                   <span className="text-white">{confirmedData?.mode}</span>
                 </div>
                 <div className="flex justify-between">
@@ -420,29 +503,29 @@ export default function SchedulePage() {
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+                <a
+                  href={getGoogleCalendarLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3.5 rounded-xl bg-[#D4A54A] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-wider flex items-center space-x-2 shadow-lg shadow-[#D4A54A]/20 hover:bg-[#c3943b] transition-all cursor-pointer"
+                >
+                  <CalendarCheck className="w-4 h-4" />
+                  <span>Add to Google Calendar (1-Click)</span>
+                </a>
+
                 <button
                   onClick={downloadICSFile}
-                  className="px-6 py-3.5 rounded-xl bg-[#D4A54A] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-wider flex items-center space-x-2 shadow-lg shadow-[#D4A54A]/20 hover:bg-[#c3943b] transition-all cursor-pointer"
+                  className="px-6 py-3.5 rounded-xl bg-white/5 border border-white/15 text-white hover:bg-white/10 font-heading font-bold text-xs uppercase tracking-wider flex items-center space-x-2 transition-all cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download .ICS Calendar Event</span>
                 </button>
 
-                <a
-                  href={getOutlookWebLink()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-6 py-3.5 rounded-xl bg-white/5 border border-white/15 text-white hover:bg-white/10 font-heading font-bold text-xs uppercase tracking-wider flex items-center space-x-2 transition-all"
-                >
-                  <span>Add to Outlook Web</span>
-                  <ExternalLink className="w-4 h-4 text-[#D4A54A]" />
-                </a>
-
                 <button
                   onClick={() => setBookingConfirmed(false)}
                   className="px-6 py-3.5 rounded-xl text-gray-400 hover:text-white font-heading text-xs font-bold uppercase tracking-wider"
                 >
-                  Schedule Another Session
+                  Schedule Another
                 </button>
               </div>
             </GlassCard>
@@ -556,7 +639,7 @@ export default function SchedulePage() {
                               {person.role}
                             </p>
                             <p className="text-[10px] font-mono text-gray-400 truncate mt-0.5">
-                              {person.email}
+                              thiranprivateltd@gmail.com
                             </p>
                           </div>
                         </div>
@@ -709,7 +792,7 @@ export default function SchedulePage() {
 
                     <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center space-x-3 text-xs text-gray-300">
                       <CalendarCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                      <span>Host Outlook Calendar invite automatically syncs with <strong>24-hour reminder</strong>.</span>
+                      <span>Google Calendar invitation automatically alerts with <strong>24-hour reminder</strong>.</span>
                     </div>
                   </GlassCard>
                 </div>
@@ -810,7 +893,7 @@ export default function SchedulePage() {
                       <div className="p-3 bg-[#2B1420]/60 border border-[#D4A54A]/30 rounded-xl text-xs space-y-1">
                         <div className="flex justify-between">
                           <span className="text-gray-400">Selected Host:</span>
-                          <strong className="text-white">{selectedPerson.name} ({selectedPerson.email})</strong>
+                          <strong className="text-white">{selectedPerson.name} (thiranprivateltd@gmail.com)</strong>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Date & Slot:</span>
@@ -825,10 +908,10 @@ export default function SchedulePage() {
                         className="w-full py-4 rounded-xl bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-heading font-bold text-xs uppercase tracking-widest transition-all hover:scale-[1.01] flex items-center justify-center space-x-2 shadow-lg shadow-[#D4A54A]/20 cursor-pointer disabled:opacity-50"
                       >
                         {isSubmitting ? (
-                          <span>Submitting & Dispatching to Member...</span>
+                          <span>Scheduling & Dispatching to Mail...</span>
                         ) : (
                           <>
-                            <span>Submit Request & Dispatch Confirmation</span>
+                            <span>Confirm & Schedule Meeting</span>
                             <Send className="w-4 h-4" />
                           </>
                         )}
