@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Cal, { getCalApi } from '@calcom/embed-react';
 import { 
   Calendar as CalendarIcon, 
-  Clock, 
   Briefcase, 
   Building2, 
   Tv, 
@@ -14,9 +12,8 @@ import {
   ExternalLink,
   ShieldCheck,
   Video,
-  Sparkles,
-  RefreshCw,
-  Mail
+  Mail,
+  Check
 } from 'lucide-react';
 import SectionEyebrow from '@/components/SectionEyebrow';
 import GlassCard from '@/components/GlassCard';
@@ -29,7 +26,7 @@ const purposes = [
     id: 'investment',
     title: 'Investment Inquiry',
     icon: Briefcase,
-    badge: '30 Min • Google Meet / Outlook',
+    badge: 'Google Meet • Outlook Sync',
     desc: 'Angel investors, venture funds & strategic growth discussions with leadership.',
     calLink: DEFAULT_CAL_LINK
   },
@@ -37,7 +34,7 @@ const purposes = [
     id: 'partnership',
     title: 'Partnership / Institution',
     icon: Building2,
-    badge: '30 Min • Google Meet / Outlook',
+    badge: 'Google Meet • Outlook Sync',
     desc: 'Colleges, schools, enterprise software & strategic institutional tie-ups.',
     calLink: DEFAULT_CAL_LINK
   },
@@ -45,7 +42,7 @@ const purposes = [
     id: 'press',
     title: 'Media & Press',
     icon: Tv,
-    badge: '20 Min • Google Meet / Outlook',
+    badge: 'Google Meet • Outlook Sync',
     desc: 'Interviews, podcast appearances, press coverage & publications.',
     calLink: DEFAULT_CAL_LINK
   },
@@ -53,15 +50,15 @@ const purposes = [
     id: 'guidance',
     title: 'Student & Career Guidance',
     icon: GraduationCap,
-    badge: '30 Min • Google Meet / Outlook',
-    desc: 'NextStep early advisory, university counseling & mentorship.',
+    badge: 'Google Meet • Outlook Sync',
+    desc: 'NextStep early advisory, university counseling & student mentorship.',
     calLink: DEFAULT_CAL_LINK
   },
   {
     id: 'leadership',
     title: 'Executive Advisory',
     icon: HelpCircle,
-    badge: '45 Min • Google Meet / Outlook',
+    badge: 'Google Meet • Outlook Sync',
     desc: 'General executive queries, AI product strategy or technical collaboration.',
     calLink: DEFAULT_CAL_LINK
   }
@@ -69,30 +66,10 @@ const purposes = [
 
 export default function SchedulePage() {
   const [selectedPurpose, setSelectedPurpose] = useState(purposes[0].id);
-  const [isCalReady, setIsCalReady] = useState(false);
-
-  useEffect(() => {
-    (async function () {
-      try {
-        const cal = await getCalApi();
-        cal('ui', {
-          theme: 'dark',
-          styles: {
-            branding: { brandColor: '#D4A54A' }
-          },
-          hideEventTypeDetails: false,
-          layout: 'month_view'
-        });
-        setIsCalReady(true);
-      } catch (err) {
-        console.warn('Cal.com embed initialization notice:', err);
-        setIsCalReady(true);
-      }
-    })();
-  }, []);
 
   const currentPurposeObj = purposes.find((p) => p.id === selectedPurpose) || purposes[0];
   const activeCalLink = currentPurposeObj.calLink;
+  const embedUrl = `https://cal.com/${activeCalLink}?theme=dark&embed=true`;
 
   return (
     <div className="min-h-screen py-24 relative overflow-hidden bg-[#1A1425] text-white">
@@ -123,7 +100,7 @@ export default function SchedulePage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-[#B8A9A0] text-sm md:text-base max-w-2xl mx-auto"
           >
-            Powered by <strong>Cal.com</strong> with seamless <strong>Google Meet</strong> and <strong>Microsoft Outlook</strong> integration. Instant calendar invitations and automatic meeting links will be issued to your inbox.
+            Powered by <strong>Cal.com</strong> with integrated <strong>Google Meet</strong> and <strong>Microsoft Outlook</strong> synchronization. Calendar invitations with video conference links will be automatically sent to your email.
           </motion.p>
 
           {/* Integration Badges */}
@@ -135,7 +112,7 @@ export default function SchedulePage() {
           >
             <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center space-x-2">
               <Video className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Google Meet Integrated</span>
+              <span>Google Meet Auto-Link</span>
             </span>
             <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center space-x-2">
               <Mail className="w-3.5 h-3.5 text-sky-400" />
@@ -149,7 +126,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Step 1: Purpose Filter */}
-        <div className="mb-10">
+        <div className="mb-8">
           <div className="flex items-center space-x-3 mb-5">
             <span className="w-7 h-7 rounded-full bg-[#D4A54A] text-[#1A1425] font-black text-xs flex items-center justify-center font-heading">
               1
@@ -182,17 +159,23 @@ export default function SchedulePage() {
                     }`}>
                       <Icon className="w-4 h-4" />
                     </div>
-                    <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider">
-                      {purpose.badge}
-                    </span>
+                    {isSelected && (
+                      <span className="text-[#D4A54A] text-[10px] font-heading font-bold uppercase tracking-wider bg-[#D4A54A]/10 px-2 py-0.5 rounded-full border border-[#D4A54A]/30 flex items-center space-x-1">
+                        <Check className="w-3 h-3" />
+                        <span>Selected</span>
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="font-heading text-sm font-bold text-white mb-1">
                     {purpose.title}
                   </h3>
-                  <p className="text-xs text-[#B8A9A0] leading-relaxed">
+                  <p className="text-xs text-[#B8A9A0] leading-relaxed mb-2">
                     {purpose.desc}
                   </p>
+                  <div className="text-[10px] font-mono text-gray-400">
+                    {purpose.badge}
+                  </div>
                 </button>
               );
             })}
@@ -217,19 +200,20 @@ export default function SchedulePage() {
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#D4A54A] hover:underline"
             >
-              <span>Open in new tab</span>
+              <span>Open in full tab</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
 
-          <GlassCard className="p-2 sm:p-6 border-[#D4A54A]/30 overflow-hidden min-h-[620px] rounded-3xl bg-[#1A1425]/95">
-            <Cal
-              calLink={activeCalLink}
-              style={{ width: '100%', height: '100%', minHeight: '620px', overflow: 'auto' }}
-              config={{
-                layout: 'month_view',
-                theme: 'dark'
-              }}
+          <GlassCard className="p-2 sm:p-4 border-[#D4A54A]/30 overflow-hidden rounded-3xl bg-[#1A1425]/95 shadow-2xl">
+            <iframe
+              src={embedUrl}
+              title="Cal.com Scheduling Calendar"
+              width="100%"
+              height="700"
+              frameBorder="0"
+              className="w-full h-[700px] border-0 rounded-2xl bg-transparent"
+              allow="camera; microphone; fullscreen; display-capture; autoplay"
             />
           </GlassCard>
         </div>
