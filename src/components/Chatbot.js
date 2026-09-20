@@ -39,7 +39,7 @@ export default function Chatbot() {
           ...prev,
           {
             role: 'ai',
-            text: "You can schedule a dedicated 1-on-1 session directly with our leadership or guidance team on Microsoft Outlook & Teams.",
+            text: "You can schedule a dedicated 1-on-1 session directly via Cal.com, automatically synced with Google Meet and Microsoft Outlook.",
             showBooking: true,
           }
         ]);
