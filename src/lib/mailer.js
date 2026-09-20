@@ -1,60 +1,84 @@
-// Helper to get transporter for a specific sender email or default master account
-export const getTransporter = (fromEmail) => {
-  let user = process.env.SMTP_USER || 'ceothiran@outlook.com';
-  let pass = process.env.SMTP_PASS;
+import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 
-  if (fromEmail) {
-    const emailLower = fromEmail.toLowerCase();
-    if (emailLower.includes('ceothiran')) {
-      user = process.env.OUTLOOK_VARSHITH_USER || user;
-      pass = process.env.OUTLOOK_VARSHITH_PASS || pass;
-    } else if (emailLower.includes('coothiran')) {
-      user = process.env.OUTLOOK_DHARSHAN_USER || user;
-      pass = process.env.OUTLOOK_DHARSHAN_PASS || pass;
-    } else if (emailLower.includes('projectmanagerthiran')) {
-      user = process.env.OUTLOOK_BRUNDAVANAM_USER || user;
-      pass = process.env.OUTLOOK_BRUNDAVANAM_PASS || pass;
-    } else if (emailLower.includes('productmanagerthiran')) {
-      user = process.env.OUTLOOK_RAHAV_USER || user;
-      pass = process.env.OUTLOOK_RAHAV_PASS || pass;
-    } else if (emailLower.includes('techleadthiran')) {
-      user = process.env.OUTLOOK_MUKUNTHAN_USER || user;
-      pass = process.env.OUTLOOK_MUKUNTHAN_PASS || pass;
-    } else if (emailLower.includes('hrcoordinatorthiran')) {
-      user = process.env.OUTLOOK_PRAVEENA_USER || user;
-      pass = process.env.OUTLOOK_PRAVEENA_PASS || pass;
-    } else if (emailLower.includes('digitalmediathiran')) {
-      user = process.env.OUTLOOK_AKASH_USER || user;
-      pass = process.env.OUTLOOK_AKASH_PASS || pass;
-    } else if (emailLower.includes('careerresearchanalystthiran')) {
-      user = process.env.OUTLOOK_HARIHARAN_USER || user;
-      pass = process.env.OUTLOOK_HARIHARAN_PASS || pass;
-    } else if (emailLower.includes('aimldevthiran')) {
-      user = process.env.OUTLOOK_KEERTHANA_USER || user;
-      pass = process.env.OUTLOOK_KEERTHANA_PASS || pass;
+// Initialize Twilio SendGrid if standard SendGrid API key exists
+const initialApiKey = process.env.SENDGRID_API_KEY || process.env.TWILIO_SENDGRID_API_KEY;
+if (initialApiKey && initialApiKey.startsWith('SG.')) {
+  sgMail.setApiKey(initialApiKey);
+}
+
+// Fallback SMTP Transporter (SendGrid SMTP)
+export const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: false,
+  auth: {
+    user: 'apikey',
+    pass: process.env.SENDGRID_API_KEY || process.env.TWILIO_SENDGRID_API_KEY || process.env.SMTP_PASS,
+  },
+});
+
+export const sendEmail = async ({ from, to, cc, replyTo, subject, text, html, attachments, icalEvent }) => {
+  const apiKey = process.env.SENDGRID_API_KEY || process.env.TWILIO_SENDGRID_API_KEY;
+  const senderEmail = from || process.env.SENDGRID_FROM_EMAIL || 'ceothiran@outlook.com';
+
+  // 1. Primary Method: Twilio SendGrid Web API (Direct HTTPS)
+  if (apiKey && apiKey.startsWith('SG.')) {
+    try {
+      sgMail.setApiKey(apiKey);
+
+      const msg = {
+        to,
+        from: {
+          email: senderEmail,
+          name: 'Thiran Corporate'
+        },
+        replyTo: replyTo || senderEmail,
+        subject,
+        text: text || '',
+        html: html || '',
+      };
+
+      if (cc) msg.cc = cc;
+
+      // Handle attachments / .ics calendar invite for SendGrid API
+      const formattedAttachments = [];
+
+      if (attachments && attachments.length > 0) {
+        attachments.forEach(att => {
+          formattedAttachments.push({
+            content: Buffer.isBuffer(att.content) 
+              ? att.content.toString('base64') 
+              : Buffer.from(att.content).toString('base64'),
+            filename: att.filename,
+            type: att.contentType || 'text/plain',
+            disposition: 'attachment',
+          });
+        });
+      }
+
+      if (icalEvent) {
+        formattedAttachments.push({
+          content: Buffer.from(icalEvent.content).toString('base64'),
+          filename: icalEvent.filename || 'meeting-invite.ics',
+          type: 'text/calendar; method=REQUEST',
+          disposition: 'attachment',
+        });
+      }
+
+      if (formattedAttachments.length > 0) {
+        msg.attachments = formattedAttachments;
+      }
+
+      const response = await sgMail.send(msg);
+      return { success: true, response };
+    } catch (error) {
+      console.error("Twilio SendGrid API send error:", error?.response?.body || error);
     }
   }
 
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp-mail.outlook.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user,
-      pass,
-    },
-    tls: {
-      ciphers: 'SSLv3',
-      rejectUnauthorized: false
-    }
-  });
-};
-
-export const sendEmail = async ({ from, to, cc, replyTo, subject, text, html, attachments, icalEvent }) => {
+  // 2. Fallback Method: SendGrid SMTP Relay via Nodemailer
   try {
-    const senderEmail = from || process.env.SMTP_USER || 'ceothiran@outlook.com';
-    const transporter = getTransporter(senderEmail);
-
     const mailOptions = {
       from: `"Thiran Corporate" <${senderEmail}>`,
       to,
@@ -70,7 +94,7 @@ export const sendEmail = async ({ from, to, cc, replyTo, subject, text, html, at
     const info = await transporter.sendMail(mailOptions);
     return { success: true, info };
   } catch (error) {
-    console.error("Email send error:", error);
+    console.error("SMTP Relay error:", error);
     return { success: false, error };
   }
 };
