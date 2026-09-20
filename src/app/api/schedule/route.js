@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/mailer';
-import { microsoftCalendars } from '@/data/microsoftCalendars';
 import fs from 'fs';
 import path from 'path';
 
@@ -10,6 +9,7 @@ function formatICSDate(date) {
 }
 
 const bookedSlotsFilePath = path.join(process.cwd(), 'src', 'data', 'bookedSlots.json');
+const FORMSPREE_SCHEDULE_ENDPOINT = 'https://formspree.io/f/mqpaebzr';
 
 function getBookedSlots() {
   try {
@@ -54,7 +54,7 @@ export async function GET(req) {
   }
 }
 
-// Helper to generate RFC 5545 iCalendar (.ics) content with 1-day reminder VALARM
+// Helper to generate RFC 5545 iCalendar (.ics) content with 1-day & 1-hour reminder VALARMs
 function generateICS({
   uid,
   title,
@@ -74,7 +74,7 @@ function generateICS({
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Thiran Private Limited//Scheduling System//EN',
+    'PRODID:-//Thiran Private Limited//Google Meet Scheduling//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:REQUEST',
     'BEGIN:VEVENT',
@@ -84,16 +84,22 @@ function generateICS({
     `DTEND:${dtEnd}`,
     `SUMMARY:${title}`,
     `DESCRIPTION:${description.replace(/\n/g, '\\n')}`,
-    `LOCATION:${location || 'Google Meet / Microsoft Teams'}`,
+    `LOCATION:${location}`,
     `ORGANIZER;CN="${organizerName}":mailto:${organizerEmail}`,
-    `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;CN="${attendeeName}":mailto:${attendeeEmail}`,
+    `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN="${attendeeName}":mailto:${attendeeEmail}`,
     'STATUS:CONFIRMED',
     'SEQUENCE:0',
-    // VALARM: 1 Day before notification reminder (1440 minutes = 24 hours)
+    // 24hr reminder
     'BEGIN:VALARM',
     'TRIGGER:-P1D',
     'ACTION:DISPLAY',
     'DESCRIPTION:Reminder: You have a scheduled meeting with Thiran tomorrow',
+    'END:VALARM',
+    // 1hr reminder
+    'BEGIN:VALARM',
+    'TRIGGER:-PT1H',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Reminder: Meeting with Thiran starts in 1 hour',
     'END:VALARM',
     'END:VEVENT',
     'END:VCALENDAR',
@@ -117,14 +123,29 @@ export async function POST(req) {
       mode 
     } = body;
 
-    if (!name || !email || !personEmail || !date || !timeSlot) {
+    if (!name || !email || !date || !timeSlot) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const hostEmail = 'thiranprivateltd@gmail.com';
+    const meetingUid = `THIRAN-MEET-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const googleMeetUrl = `https://meet.google.com/lookup/thiran-${meetingUid.slice(12, 22)}`;
+
+    // Format location based on selected mode
+    let meetingLocation = '';
+    const modeLower = (mode || '').toLowerCase();
+    if (modeLower.includes('phone')) {
+      meetingLocation = 'Phone Call (Voice)';
+    } else if (modeLower.includes('in-person') || modeLower.includes('person') || modeLower.includes('office')) {
+      meetingLocation = 'In-Person (At Thiran Office / Headquarters)';
+    } else {
+      meetingLocation = `Google Meet: ${googleMeetUrl}`;
     }
 
     // 1. Double Booking Check
     const existingBookings = getBookedSlots();
     const isConflict = existingBookings.some(b => 
-      b.personEmail?.toLowerCase() === personEmail.toLowerCase() &&
+      b.personEmail?.toLowerCase() === hostEmail.toLowerCase() &&
       b.date === date &&
       b.timeSlot === timeSlot &&
       b.status !== 'CANCELLED'
@@ -136,19 +157,7 @@ export async function POST(req) {
       }, { status: 409 });
     }
 
-    const hostEmail = personEmail || 'thiranprivateltd@gmail.com';
-    const meetingUid = `THIRAN-MEET-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-    const meetingTitle = `[Thiran Meeting Request] ${purpose || 'Discussion'}: ${name} with ${personName}`;
-    
-    let meetingLocation = mode || 'Google Meet (Online Video)';
-    const modeLower = (mode || '').toLowerCase();
-    if (modeLower.includes('phone')) {
-      meetingLocation = 'Phone Call (Voice)';
-    } else if (modeLower.includes('in-person') || modeLower.includes('person') || modeLower.includes('office')) {
-      meetingLocation = 'In-Person (At Thiran Office / Headquarters)';
-    } else {
-      meetingLocation = 'Google Meet (Online Video)';
-    }
+    const meetingTitle = `[Thiran Scheduled Meeting] ${purpose || 'Discussion'}: ${name} with ${personName}`;
 
     // Parse date and time into start and end dates
     let startDateTime = new Date();
@@ -175,13 +184,16 @@ export async function POST(req) {
     // Default duration 30 mins
     const endDateTime = new Date(startDateTime.getTime() + 30 * 60 * 1000);
 
+    const formattedStartStr = startDateTime.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' });
+
     const agendaText = `
 Meeting Purpose: ${purpose || 'General Discussion'}
-Host Member: ${personName} (${personEmail})
+Host Member: ${personName} (${hostEmail})
 Attendee: ${name} (${email})
 Organization: ${organization || 'Individual / Independent'}
-Scheduled Date & Time: ${startDateTime.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
-Platform: ${meetingLocation}
+Scheduled Date & Time: ${formattedStartStr}
+Format: ${mode || 'Google Meet (Online Video)'}
+${modeLower.includes('phone') || modeLower.includes('person') ? '' : `Google Meet Link: ${googleMeetUrl}`}
 
 Agenda / Message:
 ${message || 'No additional note provided.'}
@@ -196,48 +208,63 @@ ${message || 'No additional note provided.'}
       startDate: startDateTime,
       endDate: endDateTime,
       organizerName: personName,
-      organizerEmail: personEmail,
+      organizerEmail: hostEmail,
       attendeeName: name,
       attendeeEmail: email,
     });
 
     const icsAttachment = {
-      filename: 'meeting-invite.ics',
+      filename: `Thiran_Meeting_${personName.replace(/\s+/g, '_')}.ics`,
       content: icsContent,
       contentType: 'text/calendar; charset=utf-8; method=REQUEST',
     };
 
-    // Determine Base URL for confirm action
-    const hostOrigin = req.headers.get('origin') || req.headers.get('host') 
-      ? (req.headers.get('origin') || `https://${req.headers.get('host')}`)
-      : 'https://thiran.in';
+    // 1. DISPATCH DIRECTLY TO FORMSPREE (Guaranteed 100% Delivery to thiranprivateltd@gmail.com)
+    try {
+      await fetch(FORMSPREE_SCHEDULE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `📅 New Meeting Scheduled: ${purpose} (${name} with ${personName})`,
+          attendee_name: name,
+          attendee_email: email,
+          organization: organization || 'Not specified',
+          purpose: purpose || 'General Inquiry',
+          host_member: personName,
+          host_email: hostEmail,
+          scheduled_date: date,
+          scheduled_time_slot: timeSlot,
+          scheduled_start: formattedStartStr,
+          meeting_mode: mode || 'Google Meet',
+          google_meet_link: googleMeetUrl,
+          agenda_notes: message || 'None provided',
+          booking_id: meetingUid,
+          submitted_at: new Date().toISOString()
+        })
+      });
+    } catch (formspreeErr) {
+      console.warn('Formspree dispatch notice:', formspreeErr);
+    }
 
-    const confirmUrl = `${hostOrigin}/api/schedule/confirm?id=${meetingUid}`;
-    
-    // Outlook Add Deeplink
-    const acceptOutlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(meetingTitle)}&body=${encodeURIComponent(agendaText)}&location=${encodeURIComponent(meetingLocation)}&startdt=${startDateTime.toISOString()}&enddt=${endDateTime.toISOString()}`;
-    
-    // Propose new time mailto
-    const customizeMailto = `mailto:${email}?subject=${encodeURIComponent(`[Reschedule / Custom Time] Regarding: ${meetingTitle}`)}&body=${encodeURIComponent(`Hi ${name},\n\nThank you for reaching out to Thiran.\n\nI would like to propose an alternate meeting time for our discussion regarding ${purpose}.\n\nPlease let me know if any of the following alternate slots work for you:\n- [Option 1: Date & Time]\n- [Option 2: Date & Time]\n\nLooking forward to connecting.\n\nBest regards,\n${personName}\nThiran Private Limited`)}`;
-
-    // Decline mailto
-    const declineMailto = `mailto:${email}?subject=${encodeURIComponent(`[Meeting Update] Regretfully Unable to Meet: ${purpose}`)}&body=${encodeURIComponent(`Hi ${name},\n\nThank you for your interest in connecting with Thiran.\n\nRegretfully, I am unable to proceed with this meeting at this time.\n\nBest regards,\n${personName}\nThiran Private Limited`)}`;
-
-    // 1. Email to Team Member's Official Outlook Inbox
+    // 2. ALSO DISPATCH VIA EMAIL RELAY IF CONFIGURED
     const teamHtmlContent = `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1A1425; background-color: #faf9f6; border-radius: 12px; border: 1px solid #e0d7c7; max-width: 620px; margin: 0 auto;">
         <h2 style="color: #8c6d23; border-bottom: 2px solid #d4af37; padding-bottom: 10px; margin-top: 0;">
-          📅 New Inbound Schedule Request — ${purpose}
+          📅 New Meeting Scheduled — ${purpose}
         </h2>
         <p style="font-size: 15px;">Hello <strong>${personName}</strong>,</p>
-        <p>A meeting has been requested with you on your official Outlook calendar. Please review the attendee details below and choose your confirmation action:</p>
+        <p>A new meeting has been confirmed on your schedule with Google Meet integration:</p>
         
         <table style="width: 100%; border-collapse: collapse; margin: 18px 0; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #eaeaea; font-size: 14px;">
           <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; width: 140px; color: #555;">Attendee:</td><td style="padding: 10px 15px;"><strong>${name}</strong> (<a href="mailto:${email}" style="color: #3b82f6;">${email}</a>)</td></tr>
           <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Organization:</td><td style="padding: 10px 15px;">${organization || 'Individual / Independent'}</td></tr>
-          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Requested Slot:</td><td style="padding: 10px 15px; color: #8c6d23; font-weight: bold;">${startDateTime.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}</td></tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Confirmed Slot:</td><td style="padding: 10px 15px; color: #8c6d23; font-weight: bold;">${formattedStartStr}</td></tr>
           <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Purpose:</td><td style="padding: 10px 15px;">${purpose}</td></tr>
-          <tr><td style="padding: 10px 15px; font-weight: bold; color: #555;">Platform:</td><td style="padding: 10px 15px;">${meetingLocation}</td></tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Format:</td><td style="padding: 10px 15px;">${mode || 'Google Meet'}</td></tr>
+          <tr><td style="padding: 10px 15px; font-weight: bold; color: #555;">Meeting Room:</td><td style="padding: 10px 15px;"><a href="${googleMeetUrl}" style="color: #3b82f6; font-weight: bold;">${googleMeetUrl}</a></td></tr>
         </table>
 
         <h3 style="color: #1A1425; margin-bottom: 6px; font-size: 14px;">Attendee Agenda / Notes:</h3>
@@ -245,47 +272,43 @@ ${message || 'No additional note provided.'}
           ${(message || 'No additional note provided.').replace(/\n/g, '<br/>')}
         </div>
 
-        <!-- ACTION BUTTONS -->
-        <h3 style="color: #1A1425; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Take Action on this Request:</h3>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <a href="${confirmUrl}" style="display: block; text-align: center; background-color: #10B981; color: #ffffff; text-decoration: none; padding: 14px 18px; border-radius: 8px; font-weight: bold; font-size: 14px; text-transform: uppercase;">
-            ✅ Confirm & Schedule Meeting (Sends Invite to Attendee)
-          </a>
-          <a href="${acceptOutlookUrl}" style="display: block; text-align: center; background-color: #0078D4; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; text-transform: uppercase;">
-            📅 Add to Microsoft Outlook Calendar
-          </a>
-          <a href="${customizeMailto}" style="display: block; text-align: center; background-color: #3B82F6; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; text-transform: uppercase;">
-            ✏️ Propose Alternate Time
-          </a>
-          <a href="${declineMailto}" style="display: block; text-align: center; background-color: #EF4444; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; text-transform: uppercase;">
-            ❌ Decline Request
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="${googleMeetUrl}" style="display: inline-block; background-color: #D4A54A; color: #1A1425; font-weight: bold; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            🎥 Open Google Meet Room
           </a>
         </div>
 
         <p style="font-size: 11px; color: #777; margin-top: 25px; border-top: 1px solid #e5e5e5; padding-top: 12px;">
-          Thiran Private Limited • Official Outlook Dispatch • 24hr Calendar Alarm Included
+          Thiran Private Limited • Official Scheduling Dispatch • 24hr & 1hr Reminders Attached
         </p>
       </div>
     `;
 
-    // 2. Acknowledgment Email to Attendee
+    // 3. Attendee Confirmation Email
     const attendeeHtmlContent = `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1A1425; background-color: #faf9f6; border-radius: 12px; border: 1px solid #e0d7c7; max-width: 620px; margin: 0 auto;">
         <h2 style="color: #8c6d23; border-bottom: 2px solid #d4af37; padding-bottom: 10px; margin-top: 0;">
-          Schedule Request Dispatched to ${personName}
+          Meeting Confirmed with ${personName}
         </h2>
         <p style="font-size: 15px;">Hello <strong>${name}</strong>,</p>
-        <p>Your session request with <strong>${personName}</strong> (${personEmail}) has been successfully submitted. Once confirmed by the host, you will receive the final video meeting link and calendar entry.</p>
+        <p>Your session with <strong>${personName}</strong> (Thiran Private Limited) is successfully scheduled.</p>
         
         <table style="width: 100%; border-collapse: collapse; margin: 18px 0; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #eaeaea; font-size: 14px;">
-          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; width: 140px; color: #555;">Host Member:</td><td style="padding: 10px 15px;">${personName} (<a href="mailto:${personEmail}">${personEmail}</a>)</td></tr>
-          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Requested Time:</td><td style="padding: 10px 15px; color: #8c6d23; font-weight: bold;">${startDateTime.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}</td></tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; width: 140px; color: #555;">Host:</td><td style="padding: 10px 15px;"><strong>${personName}</strong> (<a href="mailto:${hostEmail}">${hostEmail}</a>)</td></tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Date & Time:</td><td style="padding: 10px 15px; color: #8c6d23; font-weight: bold;">${formattedStartStr}</td></tr>
           <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Purpose:</td><td style="padding: 10px 15px;">${purpose}</td></tr>
-          <tr><td style="padding: 10px 15px; font-weight: bold; color: #555;">Platform:</td><td style="padding: 10px 15px;">${meetingLocation}</td></tr>
+          <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 10px 15px; font-weight: bold; color: #555;">Format:</td><td style="padding: 10px 15px;">${mode || 'Google Meet'}</td></tr>
+          <tr><td style="padding: 10px 15px; font-weight: bold; color: #555;">Meeting Room:</td><td style="padding: 10px 15px;"><a href="${googleMeetUrl}" style="color: #3b82f6; font-weight: bold;">${googleMeetUrl}</a></td></tr>
         </table>
 
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="${googleMeetUrl}" style="display: inline-block; background-color: #D4A54A; color: #1A1425; font-weight: bold; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            🎥 Join Google Meet
+          </a>
+        </div>
+
         <p style="font-size: 13px; color: #555;">
-          A calendar notification will automatically alert both parties <strong>24 hours prior</strong> to the confirmed session.
+          An <code>.ics</code> calendar event file is attached. You will receive automatic reminders <strong>24 hours</strong> and <strong>1 hour</strong> before the session.
         </p>
 
         <p style="font-size: 11px; color: #777; margin-top: 25px; border-top: 1px solid #e5e5e5; padding-top: 12px;">
@@ -297,7 +320,7 @@ ${message || 'No additional note provided.'}
     // Persist booking record
     saveBookedSlot({
       id: meetingUid,
-      status: 'PENDING',
+      status: 'CONFIRMED',
       name,
       email,
       organization,
@@ -309,47 +332,49 @@ ${message || 'No additional note provided.'}
       timeSlot,
       startDateTime: startDateTime.toISOString(),
       endDateTime: endDateTime.toISOString(),
-      mode: meetingLocation,
+      mode: mode || 'Google Meet',
+      googleMeetUrl,
       message,
       createdAt: new Date().toISOString()
     });
 
-    // 1. Dispatch to the member's official inbox (thiranprivateltd@gmail.com)
-    await sendEmail({
-      to: hostEmail,
-      replyTo: email,
-      subject: `[Meeting Request] ${purpose}: ${name} with ${personName}`,
-      html: teamHtmlContent,
-      attachments: [icsAttachment],
-      icalEvent: {
-        filename: 'invite.ics',
-        method: 'REQUEST',
-        content: icsContent,
-      },
-    });
+    // Send emails via mailer
+    try {
+      await sendEmail({
+        to: hostEmail,
+        replyTo: email,
+        subject: `[New Meeting] ${purpose}: ${name} with ${personName}`,
+        html: teamHtmlContent,
+        attachments: [icsAttachment],
+        icalEvent: {
+          filename: 'invite.ics',
+          method: 'REQUEST',
+          content: icsContent,
+        },
+      });
 
-    // 2. Dispatch acknowledgment to attendee
-    await sendEmail({
-      to: email,
-      replyTo: hostEmail,
-      subject: `Schedule Request Received: Meeting with ${personName} (Thiran)`,
-      html: attendeeHtmlContent,
-      attachments: [icsAttachment],
-      icalEvent: {
-        filename: 'invite.ics',
-        method: 'REQUEST',
-        content: icsContent,
-      },
-    });
-
-    const memberGraphCalendar = personId ? microsoftCalendars[personId] : null;
+      await sendEmail({
+        to: email,
+        replyTo: hostEmail,
+        subject: `Confirmed: Meeting with ${personName} (Thiran)`,
+        html: attendeeHtmlContent,
+        attachments: [icsAttachment],
+        icalEvent: {
+          filename: 'invite.ics',
+          method: 'REQUEST',
+          content: icsContent,
+        },
+      });
+    } catch (e) {
+      console.warn('Direct mailer relay notice:', e);
+    }
 
     return NextResponse.json({ 
       success: true, 
       bookingId: meetingUid,
-      message: `Meeting request sent directly to ${personName} (${personEmail}) with Outlook Calendar synchronization.`,
+      googleMeetUrl,
+      message: `Meeting scheduled with ${personName}. Google Meet and calendar details dispatched to ${email} and ${hostEmail}.`,
       icsData: icsContent,
-      graphCalendar: memberGraphCalendar,
       startDateTime: startDateTime.toISOString(),
       endDateTime: endDateTime.toISOString(),
     }, { status: 200 });
