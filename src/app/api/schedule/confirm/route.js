@@ -105,21 +105,33 @@ export async function GET(req) {
       slots[index] = booking;
       saveAllBookedSlots(slots);
 
-      const meetingUrl = booking.mode?.toLowerCase().includes('google meet')
-        ? `https://meet.google.com/lookup/thiran-${booking.id.slice(0, 10)}`
-        : `https://teams.microsoft.com/l/meetup-join/thiran-${booking.id.slice(0, 10)}`;
+      let meetingUrl = '';
+      let displayLocation = '';
 
-      const meetingTitle = `[CONFIRMED] ${booking.purpose || 'Session'}: ${booking.name} & ${booking.personName}`;
+      const modeLower = (booking.mode || '').toLowerCase();
+      if (modeLower.includes('phone')) {
+        displayLocation = 'Phone Call (Voice)';
+        meetingUrl = 'Voice Call (Host will dial attendee phone / phone conference)';
+      } else if (modeLower.includes('in-person') || modeLower.includes('person') || modeLower.includes('office')) {
+        displayLocation = 'Thiran Office / Headquarters';
+        meetingUrl = 'In-Person at Thiran Private Limited Headquarters';
+      } else {
+        // Default to Google Meet for all online video meetings
+        displayLocation = 'Google Meet';
+        meetingUrl = `https://meet.google.com/lookup/thiran-${booking.id.slice(0, 10)}`;
+      }
+
+      const meetingTitle = `[CONFIRMED] ${booking.purpose || 'Session'}: ${booking.name} with ${booking.personName}`;
       const startDateTime = new Date(booking.startDateTime || `${booking.date}T16:30:00`);
       const endDateTime = new Date(booking.endDateTime || (startDateTime.getTime() + 30 * 60 * 1000));
 
       const agendaText = `
 Meeting Confirmed: ${booking.purpose}
-Host: ${booking.personName} (${booking.personEmail})
+Host: ${booking.personName} (${booking.personEmail || 'thiranprivateltd@gmail.com'})
 Attendee: ${booking.name} (${booking.email})
 Scheduled Time: ${startDateTime.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
-Meeting Link: ${meetingUrl}
-Platform: ${booking.mode || 'Google Meet / Outlook Video'}
+Meeting Format: ${displayLocation}
+${modeLower.includes('meet') || (!modeLower.includes('phone') && !modeLower.includes('person')) ? `Google Meet Link: ${meetingUrl}` : `Location/Access: ${meetingUrl}`}
 
 Agenda:
 ${booking.message || 'No specific agenda provided.'}
@@ -129,11 +141,11 @@ ${booking.message || 'No specific agenda provided.'}
         uid: booking.id,
         title: meetingTitle,
         description: agendaText,
-        location: meetingUrl,
+        location: displayLocation.includes('Google Meet') ? meetingUrl : displayLocation,
         startDate: startDateTime,
         endDate: endDateTime,
         organizerName: booking.personName,
-        organizerEmail: booking.personEmail,
+        organizerEmail: booking.personEmail || 'thiranprivateltd@gmail.com',
         attendeeName: booking.name,
         attendeeEmail: booking.email,
       });
