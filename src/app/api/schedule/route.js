@@ -136,9 +136,19 @@ export async function POST(req) {
       }, { status: 409 });
     }
 
+    const hostEmail = personEmail || 'thiranprivateltd@gmail.com';
     const meetingUid = `THIRAN-MEET-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const meetingTitle = `[Thiran Meeting Request] ${purpose || 'Discussion'}: ${name} with ${personName}`;
-    const meetingLocation = mode || 'Google Meet';
+    
+    let meetingLocation = mode || 'Google Meet (Online Video)';
+    const modeLower = (mode || '').toLowerCase();
+    if (modeLower.includes('phone')) {
+      meetingLocation = 'Phone Call (Voice)';
+    } else if (modeLower.includes('in-person') || modeLower.includes('person') || modeLower.includes('office')) {
+      meetingLocation = 'In-Person (At Thiran Office / Headquarters)';
+    } else {
+      meetingLocation = 'Google Meet (Online Video)';
+    }
 
     // Parse date and time into start and end dates
     let startDateTime = new Date();
@@ -294,7 +304,7 @@ ${message || 'No additional note provided.'}
       purpose,
       personId,
       personName,
-      personEmail,
+      personEmail: hostEmail,
       date,
       timeSlot,
       startDateTime: startDateTime.toISOString(),
@@ -304,9 +314,9 @@ ${message || 'No additional note provided.'}
       createdAt: new Date().toISOString()
     });
 
-    // 1. Dispatch to the member's official Outlook address
+    // 1. Dispatch to the member's official inbox (thiranprivateltd@gmail.com)
     await sendEmail({
-      to: personEmail,
+      to: hostEmail,
       replyTo: email,
       subject: `[Meeting Request] ${purpose}: ${name} with ${personName}`,
       html: teamHtmlContent,
@@ -321,7 +331,7 @@ ${message || 'No additional note provided.'}
     // 2. Dispatch acknowledgment to attendee
     await sendEmail({
       to: email,
-      replyTo: personEmail,
+      replyTo: hostEmail,
       subject: `Schedule Request Received: Meeting with ${personName} (Thiran)`,
       html: attendeeHtmlContent,
       attachments: [icsAttachment],
