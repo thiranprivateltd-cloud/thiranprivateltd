@@ -35,7 +35,7 @@ function ConfirmedContent() {
               Session Confirmed with {host}
             </h1>
             <p className="text-sm text-gray-300 max-w-lg mx-auto mt-2">
-              The meeting request has been approved. A confirmation email with the Google Meet conference link and Outlook calendar invite has been dispatched to <strong>{attendee}</strong>.
+              The meeting request has been approved. A confirmation notification with the Google Meet conference link and Google Calendar invite has been dispatched to <strong>{attendee}</strong>.
             </p>
           </div>
 
