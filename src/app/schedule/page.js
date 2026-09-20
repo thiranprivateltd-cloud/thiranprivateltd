@@ -67,13 +67,13 @@ const purposes = [
   }
 ];
 
-// 2. Official Team Roster with Outlook Accounts
+// 2. Official Team Roster (Official Contact: thiranprivateltd@gmail.com)
 const allPeople = [
   {
     id: 'varshith',
     name: 'Varshith G S',
     role: 'Founder & CEO',
-    email: 'ceothiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'Strategic Vision, Capital & Leadership',
     initials: 'VG',
     image: '/founder.jpg'
@@ -82,7 +82,7 @@ const allPeople = [
     id: 'dharshan',
     name: 'Dharshan S',
     role: 'Co-Founder & COO',
-    email: 'coothiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'Operations, LaunchLab & Expansion',
     initials: 'DS',
     image: null
@@ -91,7 +91,7 @@ const allPeople = [
     id: 'brundavanam',
     name: 'Brundavanam P',
     role: 'Project Manager',
-    email: 'projectmanagerthiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'Ecosystem Operations & Delivery',
     initials: 'BP',
     image: null
@@ -100,7 +100,7 @@ const allPeople = [
     id: 'rahav',
     name: 'Rahav V K',
     role: 'Product Manager',
-    email: 'productmanagerthiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'Product Strategy & Institutional Alliances',
     initials: 'RV',
     image: null
@@ -109,7 +109,7 @@ const allPeople = [
     id: 'mukunthan',
     name: 'Mukunthan S',
     role: 'Tech Lead',
-    email: 'techleadthiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'Platform Architecture & Tech Integrations',
     initials: 'MS',
     image: null
@@ -118,7 +118,7 @@ const allPeople = [
     id: 'praveena',
     name: 'Praveena R',
     role: 'HR Coordinator',
-    email: 'hrcoordinatorthiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'Talent, Institutional Hiring & People Ops',
     initials: 'PR',
     image: null
@@ -127,7 +127,7 @@ const allPeople = [
     id: 'akash',
     name: 'Akash M',
     role: 'Digital Media Lead',
-    email: 'digitalmediathiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'Press Relations, Media & Broadcasts',
     initials: 'AM',
     image: null
@@ -136,7 +136,7 @@ const allPeople = [
     id: 'hariharan',
     name: 'Hari Haran V',
     role: 'Career Research Analyst',
-    email: 'careerresearchanalystthiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'NextStep Student Counseling & AI Data',
     initials: 'HV',
     image: null
@@ -145,7 +145,7 @@ const allPeople = [
     id: 'keerthana',
     name: 'Keerthana P S',
     role: 'AI/ML Developer',
-    email: 'aimldevthiran@outlook.com',
+    email: 'thiranprivateltd@gmail.com',
     subtitle: 'NextStep Diagnostics & Technical Mentorship',
     initials: 'KP',
     image: null
@@ -779,17 +779,16 @@ export default function SchedulePage() {
 
                         <div>
                           <label className="block text-xs font-heading uppercase tracking-wider text-gray-300 mb-1.5">
-                            Meeting Platform
+                            Meeting Format / Mode *
                           </label>
                           <select
                             value={formData.mode}
                             onChange={(e) => setFormData({ ...formData, mode: e.target.value })}
                             className="w-full bg-[#1A1425] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-[#D4A54A]"
                           >
-                            <option value="Google Meet">Google Meet (Auto-Link)</option>
-                            <option value="Microsoft Teams / Outlook Video">Microsoft Teams (Outlook Video)</option>
-                            <option value="Zoom Meeting">Zoom Meeting</option>
+                            <option value="Google Meet (Online Video)">Google Meet (Online Video)</option>
                             <option value="Phone Call (Voice)">Phone Call (Voice)</option>
+                            <option value="In-Person Meeting (Office)">In-Person Meeting (At Thiran Office)</option>
                           </select>
                         </div>
                       </div>
