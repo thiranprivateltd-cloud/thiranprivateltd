@@ -3,7 +3,7 @@
 
 export const sendEmail = async ({ from, to, cc, replyTo, subject, text, html, attachments, icalEvent }) => {
   const apiKey = process.env.SENDGRID_API_KEY || process.env.TWILIO_SENDGRID_API_KEY;
-  const senderEmail = from || process.env.SENDGRID_FROM_EMAIL || 'ceothiran@outlook.com';
+  const senderEmail = from || process.env.SENDGRID_FROM_EMAIL || 'thiranprivateltd@gmail.com';
 
   // Format attachments for SendGrid v3 API payload
   const formattedAttachments = [];
