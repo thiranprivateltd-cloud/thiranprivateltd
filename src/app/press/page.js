@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { Download, FileText, Image as ImageIcon } from 'lucide-react';
+import { Download, FileText, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import SectionEyebrow from '@/components/SectionEyebrow';
 import GlassCard from '@/components/GlassCard';
 
@@ -107,57 +107,24 @@ export default function Press() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
-                  <button
-                    onClick={() => {
-                      const element = document.createElement('a');
-                      const file = new Blob([
-                        `=========================================================================\n` +
-                        `THIRAN PRIVATE LTD - OFFICIAL PRESS RELEASE & INVITATION\n` +
-                        `=========================================================================\n` +
-                        `Date of Release : October 09, 2026 (09-10-2026)\n` +
-                        `Reference Code  : TPR-2026-ADV-001\n` +
-                        `Headquarters    : Chennai, Tamil Nadu, India\n\n` +
-                        `SUBJECT:\n` +
-                        `Thiran Invites CAs, CSs and Other Professionals to Join as Volunteer Advisors\n\n` +
-                        `CHENNAI, INDIA — October 09, 2026:\n` +
-                        `Thiran Private Ltd, an Indian software ecosystem and educational technology firm, has officially announced an open invitation for Chartered Accountants (CAs), Company Secretaries (CSs), legal advisors, and corporate veterans across India to join as Volunteer Advisors on its Advisory & Mentorship Council.\n\n` +
-                        `OBJECTIVES OF THE ADVISORY COUNCIL:\n` +
-                        `1. Corporate Governance & Statutory Compliance Guidance\n` +
-                        `2. Financial Structuring, Auditing & Tax Strategy Advisory for Emerging Ventures\n` +
-                        `3. Mentoring Student Entrepreneurs & LaunchLab Incubation Cohorts\n` +
-                        `4. Curriculum Review for NextStep Career & Professional Programs\n` +
-                        `5. Policy Insights on Corporate Law, Intellectual Property & Tech Regulation\n\n` +
-                        `WHO CAN JOIN:\n` +
-                        `- Qualified Chartered Accountants (ICAI members)\n` +
-                        `- Qualified Company Secretaries (ICSI members)\n` +
-                        `- Legal practitioners (Bar Council affiliated) specializing in Corporate & IP Law\n` +
-                        `- Senior finance, taxation, risk management, and governance executives\n\n` +
-                        `ENGAGEMENT MODEL & RECOGNITION:\n` +
-                        `- Honorary Volunteer Advisory appointment\n` +
-                        `- Public attribution on Thiran Advisory Council portal & communications\n` +
-                        `- Opportunities to host masterclasses and mentor high-potential builders\n` +
-                        `- Active participation in ecosystem roundtables and corporate board consultations\n\n` +
-                        `EXPRESSION OF INTEREST:\n` +
-                        `Interested professionals can send their profile, credentials, and letter of interest to:\n` +
-                        `Email  : hello@thiranprivateltd.com / hrheadthiran@outlook.com\n` +
-                        `Portal : https://thiranprivateltd.com/schedule\n\n` +
-                        `Issued by:\n` +
-                        `Corporate Relations & Media Division\n` +
-                        `Thiran Private Ltd, Chennai, India\n`
-                      ], { type: 'text/plain;charset=utf-8' });
-                      element.href = URL.createObjectURL(file);
-                      element.download = "Thiran-Press-Release-Volunteer-Advisors-09-10-2026.txt";
-                      document.body.appendChild(element);
-                      element.click();
-                      document.body.removeChild(element);
-                    }}
+                  <a
+                    href="/Call%20for%20Volunteers.pdf"
+                    download="Call for Volunteers - Thiran.pdf"
                     className="px-5 py-3 rounded-xl bg-[#D4A54A] hover:bg-[#c3943b] text-[#1A1425] font-bold text-xs uppercase tracking-widest flex items-center justify-center transition-all hover:scale-105 shadow-md shadow-[#D4A54A]/20 cursor-pointer"
                   >
-                    <Download className="w-4 h-4 mr-2" /> Download Document
-                  </button>
+                    <Download className="w-4 h-4 mr-2" /> Download PDF
+                  </a>
+                  <a
+                    href="/Call%20for%20Volunteers.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-bold text-xs uppercase tracking-widest flex items-center justify-center transition-colors text-center"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" /> View Document
+                  </a>
                   <a
                     href="mailto:thiranprivateltd@gmail.com?subject=Expression%20of%20Interest%20-%20Volunteer%20Advisor%20(CA/CS/Professional)&body=Dear%20Thiran%20Team,%0A%0AI%20would%20like%20to%20express%20my%20interest%20in%20joining%20as%20a%20Volunteer%20Advisor%20following%20your%20Press%20Release%20dated%2009-10-2026.%0A%0AProfessional%20Background:%0AYears%20of%20Experience:%0AContact%20Number:"
-                    className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-bold text-xs uppercase tracking-widest flex items-center justify-center transition-colors text-center"
+                    className="px-5 py-2.5 rounded-xl border border-[#D4A54A]/30 bg-[#D4A54A]/10 hover:bg-[#D4A54A]/20 text-[#D4A54A] font-bold text-[11px] uppercase tracking-wider flex items-center justify-center transition-colors text-center"
                   >
                     Inquire / Apply
                   </a>
