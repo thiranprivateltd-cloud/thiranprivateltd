@@ -156,7 +156,7 @@ export default function Press() {
                     <Download className="w-4 h-4 mr-2" /> Download Document
                   </button>
                   <a
-                    href="mailto:hello@thiranprivateltd.com?subject=Expression%20of%20Interest%20-%20Volunteer%20Advisor%20(CA/CS/Professional)&body=Dear%20Thiran%20Team,%0A%0AI%20would%20like%20to%20express%20my%20interest%20in%20joining%20as%20a%20Volunteer%20Advisor%20following%20your%20Press%20Release%20dated%2009-10-2026.%0A%0AProfessional%20Background:%0AYears%20of%20Experience:%0AContact%20Number:"
+                    href="mailto:thiranprivateltd@gmail.com?subject=Expression%20of%20Interest%20-%20Volunteer%20Advisor%20(CA/CS/Professional)&body=Dear%20Thiran%20Team,%0A%0AI%20would%20like%20to%20express%20my%20interest%20in%20joining%20as%20a%20Volunteer%20Advisor%20following%20your%20Press%20Release%20dated%2009-10-2026.%0A%0AProfessional%20Background:%0AYears%20of%20Experience:%0AContact%20Number:"
                     className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-bold text-xs uppercase tracking-widest flex items-center justify-center transition-colors text-center"
                   >
                     Inquire / Apply
